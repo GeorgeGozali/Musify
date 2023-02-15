@@ -2,4 +2,5 @@ from music_item import MusicItem
 
 
 class Artist(MusicItem):
-    pass
+    def __init__(self, full_name='Unknown Artist'):
+        self.full_name = full_name
