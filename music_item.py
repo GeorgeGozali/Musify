@@ -1,0 +1,2 @@
+class MusicItem:
+    pass
