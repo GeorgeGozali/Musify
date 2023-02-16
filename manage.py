@@ -1,14 +1,14 @@
 # from music_item import MusicItem
 # from album import Album
 # from artist import Artist
-# from song import Song
+from song import Song
 import click
 import os
 import mutagen
 from mutagen.flac import FLAC
 
 
-@click.group
+@click.group()
 def mycommands():
     pass
 
@@ -18,27 +18,30 @@ def mycommands():
 @click.option('--scan', '-s', default='m/', required=True, help='/path/to/directory')
 def scan(scan):
     """Scan directory"""
-    formats = ['ogg', 'aac', 'mp3', 'wav', 'acc', 'flac', 'm4a', 'wma']
+    formats = ('.aac', '.mp3', '.wav', '.acc', '.flac')
     dir_list = os.listdir(scan)
-    print_list = [item for item in dir_list if item.split('.')[-1] in formats]
+    print_list = [item for item in dir_list if item.endswith(formats)]
     for ix, item in enumerate(print_list, 1):
         print(ix, item)
-    f = FLAC("m/" + print_list[1])
-    f['title'] = u"Come Together"
-    print(f)
-    f.save()
+    # f = FLAC("m/" + print_list[1])
+    # f['title'] = u"Come Together"
+    # print(f)
+    # f.save()
     # print(dir(f.info))
     # print(f.info.length)
 
 
 @click.command()
-@click.option("--filename", required=1, help="/path/to/filename")
-@click.option("--tags", help="/path/to/song/tag/json/data")
-@click.option("--title", "-t", help="Title of the song")
-@click.option("--artist", help="Name of the singer")
-def add_song(tags, title, artist, filename):
+@click.option("--filename", required=1, type=str, help="/path/to/filename")
+@click.option("--tags", default="Unknown", type=str, help="/path/to/song/tag/json/data")
+@click.option("--title", "-t", default="Unknown", type=str, help="Title of the song")
+@click.option("--genre", "-g",  default="Unknown", type=str, help="Genre of the song")
+@click.option("--album", '-a',  default="Unknown", type=str, help="Album of the song")
+@click.option("--artist",  default="Unknown", type=str, help="Name of the singer")
+def add_song(tags, title, artist, album, genre, filename):
     """This Method is to add a song in a library."""
-    pass
+    Song.add_song(tags, title, artist, album, genre, filename)
+
 
 
 @click.command()
