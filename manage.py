@@ -6,11 +6,53 @@ import click
 import os
 import mutagen
 from mutagen.flac import FLAC
+import sqlite3
 
 
 @click.group()
 def mycommands():
     pass
+
+
+def create_db():
+    if not os.path.exists("database.db"):
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        CREATE_PLAYLIST = """
+            CREATE TABLE playlist (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT,
+                artist_id INTEGER,
+                genre_id INTEGER,
+                album_id INTEGER,
+                FOREIGN KEY (genre_id) REFERENCES genre (id),
+                FOREIGN KEY(artist_id) REFERENCES artist(id),
+                FOREIGN KEY(album_id) REFERENCES album(id)
+            );"""
+        CREATE_GENRE = """
+            CREATE TABLE genre (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                genre TEXT
+            );"""
+        CREATE_ALBUM = """
+            CREATE TABLE album (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT,
+                year INTEGER
+            );"""
+        CREATE_ARTIST = """
+            CREATE TABLE artist (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                full_name TEXT
+            )
+        """
+        cursor.execute(CREATE_GENRE)
+        cursor.execute(CREATE_ALBUM)
+        cursor.execute(CREATE_ARTIST)
+        cursor.execute(CREATE_PLAYLIST)
+        conn.commit()
+        conn.close()
+
 
 
 # TODO: this command should not run without this > --scan', '-s'
@@ -40,7 +82,12 @@ def scan(scan):
 @click.option("--artist",  default="Unknown", type=str, help="Name of the singer")
 def add_song(tags, title, artist, album, genre, filename):
     """This Method is to add a song in a library."""
-    Song.add_song(tags, title, artist, album, genre, filename)
+    song = Song()
+    data = song.add_song(tags, title, artist, album, genre, filename)
+    song.add_song_to_json(data)
+    # print(type(s))
+    # for k, v in s.items():
+    #     print(k, v[0])
 
 
 
@@ -56,6 +103,7 @@ mycommands.add_command(show_library)
 
 
 if __name__ == '__main__':
+    create_db()
     mycommands()
 
 
