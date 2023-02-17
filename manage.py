@@ -54,23 +54,12 @@ def create_db():
         conn.close()
 
 
-
 # TODO: this command should not run without this > --scan', '-s'
 @click.command()
 @click.option('--scan', '-s', default='m/', required=True, help='/path/to/directory')
 def scan(scan):
     """Scan directory"""
-    formats = ('.aac', '.mp3', '.wav', '.acc', '.flac')
-    dir_list = os.listdir(scan)
-    print_list = [item for item in dir_list if item.endswith(formats)]
-    for ix, item in enumerate(print_list, 1):
-        print(ix, item)
-    # f = FLAC("m/" + print_list[1])
-    # f['title'] = u"Come Together"
-    # print(f)
-    # f.save()
-    # print(dir(f.info))
-    # print(f.info.length)
+    Song.scan(scan)
 
 
 @click.command()
@@ -82,13 +71,8 @@ def scan(scan):
 @click.option("--artist",  default="Unknown", type=str, help="Name of the singer")
 def add_song(tags, title, artist, album, genre, filename):
     """This Method is to add a song in a library."""
-    song = Song()
-    data = song.add_song(tags, title, artist, album, genre, filename)
-    song.add_song_to_json(data)
-    # print(type(s))
-    # for k, v in s.items():
-    #     print(k, v[0])
-
+    s = Song()
+    s.add_song(tags, title, artist, album, genre, filename)
 
 
 @click.command()
