@@ -1,8 +1,7 @@
 from music_item import MusicItem, MUS_FORMATS
 import mutagen
 from mutagen.easyid3 import EasyID3
-from mutagen.aac import AAC
-# import json
+from mutagen.id3 import ID3NoHeaderError, ID3, TPE1, TIT2, TALB
 import os
 import sqlite3
 
@@ -61,24 +60,20 @@ class Song(MusicItem):
             filename = os.path.join(directory, item)
             try:
                 audio_file = EasyID3(filename)
-            except mutagen.id3.ID3NoHeaderError as e:
-                # audio_file = mutagen.File(filename, easy=True)
-                # audio_file.add_tags()  # (ID3=EasyID3)
-                # print(e)
-                pass
-            # except mutagen.id3._util.ID3NoHeaderError as e:
-            #     print(e)
-            #     if item.endswith(".aac"):
-            #         audio_file = AAC(filename, easy=True)
-            #         audio_file.add_tags()
-            except TypeError:
-                pass
-            try:
-                audio_file['artist'] = audio_file.get("artist", "Unknown artist")
-                audio_file['genre'] = audio_file.get("genre", "Unknown genre")
-                audio_file['album'] = audio_file.get("album", "Unknown album")
-                audio_file['title'] = audio_file.get("title", "Unknown title")
-                audio_file = audio_file.save()
-            except Exception as e:
-                # print(e)
-                pass
+                if not audio_file.get("artist"):
+                    audio_file['artist'] = u"Unknown artist"
+                if not audio_file.get("title"):
+                    audio_file['title'] = u"Unknown title"
+                if not audio_file.get("album"):
+                    audio_file['album'] = u"Unknown album"
+                audio_file.save(filename)
+            except ID3NoHeaderError:
+                if filename.endswith((".wav", ".aac")):
+                    audio_file = ID3()
+                    audio_file.add(TPE1(encoding=3, text=u'Unknown artist'))
+                    audio_file.add(TIT2(encoding=3, text=u'Unknown title'))
+                    audio_file.add(TALB(encoding=3, text=u'Unknown album'))
+                    audio_file.save(os.path.join(filename))
+            print(item)
+            print(audio_file)
+            print()

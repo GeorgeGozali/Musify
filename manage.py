@@ -71,8 +71,7 @@ def scan(scan):
 @click.option("--artist",  default="Unknown", type=str, help="Name of the singer")
 def add_song(tags, title, artist, album, genre, filename):
     """This Method is to add a song in a library."""
-    s = Song()
-    s.add_song(tags, title, artist, album, genre, filename)
+    Song.add_song(tags, title, artist, album, genre, filename)
 
 
 @click.command()
