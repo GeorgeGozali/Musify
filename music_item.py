@@ -1,3 +1,19 @@
+import sqlite3
 MUS_FORMATS = ('.mp3', '.wav', '.acc', '.flac')
+
+
 class MusicItem:
-    pass
+
+    # @staticmethod
+    @classmethod
+    def add_album_to_db(cls, album, year='Null'):
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        INSERT_QUERY = f"""
+            INSERT INTO album (title, year)
+              VALUES('{album}', {year})
+            """
+        print(INSERT_QUERY)
+        cursor.execute(INSERT_QUERY)
+        conn.commit()
+        conn.close()

@@ -8,15 +8,6 @@ import sqlite3
 
 class Song(MusicItem):
 
-    def connect_db(self, db_name="database.db"):
-        conn = sqlite3.connect(db_name)
-        cursor = conn.cursor()
-        return cursor
-
-    def save(self):
-        self.conn.commit()
-        self.conn.close()
-
     def add_song(self, tags, title, artist, album, genre, filename):
         # print("title", title)
         # print("artist", artist)
@@ -41,7 +32,7 @@ class Song(MusicItem):
         # for k, v in changed.items():
         #     print(f"{k}: {v}")
         # return audio_file
-        self.add_song_to_db(audio_file)
+        # self.add_song_to_db(audio_file)
 
     def add_song_to_db(self, audio_file):
         ADD_TO_DB = """
@@ -77,3 +68,7 @@ class Song(MusicItem):
             print(item)
             print(audio_file)
             print()
+
+    def __repr__(self):
+        return f"Song.add_song('{self.tags}', '{self.title}', '{self.artist}',\
+            '{self.album}', '{self.genre}', '{self.filename}')"

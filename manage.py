@@ -2,6 +2,7 @@
 # from album import Album
 # from artist import Artist
 from song import Song
+from album import Album
 import click
 import os
 import mutagen
@@ -14,7 +15,9 @@ def mycommands():
     pass
 
 
+@click.command()
 def create_db():
+    """ This command creates database with its tables """
     if not os.path.exists("database.db"):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
@@ -62,8 +65,9 @@ def scan(scan):
     Song.scan(scan)
 
 
+
 @click.command()
-@click.option("--filename", required=1, type=str, help="/path/to/filename")
+@click.option("--filename", required=0, type=str, help="/path/to/filename")
 @click.option("--tags", default="Unknown", type=str, help="/path/to/song/tag/json/data")
 @click.option("--title", "-t", default="Unknown", type=str, help="Title of the song")
 @click.option("--genre", "-g",  default="Unknown", type=str, help="Genre of the song")
@@ -71,7 +75,13 @@ def scan(scan):
 @click.option("--artist",  default="Unknown", type=str, help="Name of the singer")
 def add_song(tags, title, artist, album, genre, filename):
     """This Method is to add a song in a library."""
-    Song.add_song(tags, title, artist, album, genre, filename)
+    song = Song()
+    # print(Song.add_to_db)
+    # song.add_song(tags, title, artist, album, genre, filename)
+    if album:
+        print(album)
+        song.add_album_to_db(album)
+    # print(song)
 
 
 @click.command()
@@ -80,13 +90,24 @@ def show_library():
     pass
 
 
+@click.command()
+@click.option("--album", required=1, type=str, help="Album Title")
+def search_album(album):
+    """ This command finds album by title"""
+    # \n\tOptions: {"title": string}
+    # print(type(album))
+    print(Album.search(album))
+
+
 mycommands.add_command(scan)
 mycommands.add_command(add_song)
 mycommands.add_command(show_library)
+mycommands.add_command(create_db)
+mycommands.add_command(search_album)
 
 
 if __name__ == '__main__':
-    create_db()
+    # create_db()
     mycommands()
 
 
