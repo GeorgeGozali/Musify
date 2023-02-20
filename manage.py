@@ -76,12 +76,10 @@ def scan(scan):
 def add_song(tags, title, artist, album, genre, filename):
     """This Method is to add a song in a library."""
     song = Song()
-    # print(Song.add_to_db)
-    # song.add_song(tags, title, artist, album, genre, filename)
     if album:
         print(album)
         song.add_album_to_db(album)
-    # print(song)
+
 
 
 @click.command()
@@ -94,9 +92,15 @@ def show_library():
 @click.option("--album", required=1, type=str, help="Album Title")
 def search_album(album):
     """ This command finds album by title"""
-    # \n\tOptions: {"title": string}
-    # print(type(album))
     print(Album.search(album))
+
+
+@click.command()
+@click.option("--dir", prompt="/path/to/directory", help="add dir which contains music files")
+@click.option("--track", help="/path/to/musicfile")
+def playlist(dir, track):
+    if dir:
+        pass
 
 
 mycommands.add_command(scan)

@@ -9,9 +9,6 @@ import sqlite3
 class Song(MusicItem):
 
     def add_song(self, tags, title, artist, album, genre, filename):
-        # print("title", title)
-        # print("artist", artist)
-        # print("genre", genre)
         if filename.endswith(MUS_FORMATS):
             try:
                 audio_file = EasyID3(filename)
@@ -66,9 +63,14 @@ class Song(MusicItem):
                     audio_file.add(TALB(encoding=3, text=u'Unknown album'))
                     audio_file.save(os.path.join(filename))
             print(item)
-            print(audio_file)
+            for key, value in audio_file.items():
+                print(f"{key}: {value}")
             print()
 
     def __repr__(self):
         return f"Song.add_song('{self.tags}', '{self.title}', '{self.artist}',\
             '{self.album}', '{self.genre}', '{self.filename}')"
+
+    def add_to_favorites(self):
+        #  TODO: add music file to favorites
+        pass

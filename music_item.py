@@ -17,3 +17,18 @@ class MusicItem:
         cursor.execute(INSERT_QUERY)
         conn.commit()
         conn.close()
+
+    @staticmethod
+    def add_dir_to_playlist(dir):
+        #  TODO: add music files from directory to playlist
+        #  TODO: use scan method
+        #  TODO: add Dir column in playlist table
+        pass
+
+    def create_playlist(self):
+        #  TODO: create and remove playlists
+        pass
+
+    def search(self):
+        #  TODO: find album, artist, genre, music with one code
+        pass
