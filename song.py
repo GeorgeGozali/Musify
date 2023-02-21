@@ -64,8 +64,9 @@ class Song(MusicItem):
                     audio_file.add(TALB(encoding=3, text=u'Unknown album'))
                     audio_file.save(os.path.join(filename))
             print(item)
-            for key, value in audio_file.items():
-                print(f"{key}: {value}")
+            # for key, value in audio_file.items():
+            #     print(f"{key}: {value}")
+            print(audio_file)
             print()
 
     def __repr__(self):

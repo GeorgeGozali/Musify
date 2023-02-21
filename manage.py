@@ -27,6 +27,7 @@ def create_db():
             CREATE TABLE music (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT,
+                favorites INTEGER DEFAULT 0,
                 directory_id INTEGER,
                 artist_id INTEGER,
                 genre_id INTEGER,
@@ -92,19 +93,25 @@ def scan(scan):
 @click.option("--genre", "-g",  default="Unknown", type=str, help="Genre of the song")
 @click.option("--album", '-a',  default="Unknown", type=str, help="Album of the song")
 @click.option("--artist",  default="Unknown", type=str, help="Name of the singer")
-def add_song(tags, title, artist, album, genre, filename):
+@click.option("--playlist", help="name of the playlist")
+def add_song(tags, title, artist, album, genre, filename, playlist):
     """This Method is to add a song in a library."""
     song = Song()
     if album:
         print(album)
         song.add_album_to_db(album)
-
+    if playlist:
+        pass
 
 
 @click.command()
-def show_library():
+@click.option("--playlist", help="playlist name")
+def show_library(playlist):
     """Shows library"""
-    pass
+    if playlist:
+        Playlist.see_playlist(playlist)
+    else:
+        Playlist.see_playlist(many=True)
 
 
 @click.command()

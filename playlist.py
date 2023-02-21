@@ -46,7 +46,6 @@ class Playlist(MusicItem):
               VALUES('{directory}', '{self.id}');
             """
         cursor.execute(INSERT_QUERY)
-        print(INSERT_QUERY)
         conn.commit()
         conn.close()
 
@@ -61,6 +60,15 @@ class Playlist(MusicItem):
             return Playlist(id=result[0], title=result[1])  # {"id": result[0], "title": result[1]}
             # print(result[1])
         return None
+
+    def add_song(self, filename):
+        # TODO: add single song to the playlist
+        pass
+
+    def see_playlist(self, playlist=None, many=False):
+        # TODO: if many True see playlists names and len items
+        # TODO: else see len items and items
+        pass
 
     def __repr__(self):
         return f"""

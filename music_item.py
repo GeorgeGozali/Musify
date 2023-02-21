@@ -25,8 +25,11 @@ class MusicItem:
         #  TODO: add Dir column in playlist table
         pass
 
-
-
+    @staticmethod
+    def play(playlist=None, filename=None):
+        # TODO: play playlist
+        # TODO: play single music file
+        pass
 
     def search(self):
         #  TODO: find album, artist, genre, music with one code
