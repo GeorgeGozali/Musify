@@ -129,15 +129,12 @@ def search_album(album):
 def directory(dir, playlist):
     """ Add dir to the playlist"""
     if playlist:
-        # if not Playlist.exists(playlist):
-        #     Playlist.create_playlist(playlist)
-        try:
-            p = Playlist.get(playlist)
-        except TypeError:
-            p = Playlist(title=playlist)
-        print(p)
-        print(p.id, p.title)
-
+        plist = Playlist.get(playlist)
+        if not plist:
+            plist = Playlist(title=playlist)
+            plist.create()
+        plist.add_dir(dir)
+        print(f"{dir} added to {playlist}")
 
 
 mycommands.add_command(scan)
