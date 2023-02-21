@@ -23,8 +23,8 @@ def create_db():
     if not os.path.exists("database.db"):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
-        CREATE_PLAYLIST = """
-            CREATE TABLE playlist (
+        CREATE_MUSIC = """
+            CREATE TABLE music (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT,
                 directory_id INTEGER,
@@ -35,6 +35,12 @@ def create_db():
                 FOREIGN KEY (genre_id) REFERENCES genre (id),
                 FOREIGN KEY(artist_id) REFERENCES artist(id),
                 FOREIGN KEY(album_id) REFERENCES album(id)
+            );
+        """
+        CREATE_PLAYLIST = """
+            CREATE TABLE playlist (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT
             );"""
         CREATE_GENRE = """
             CREATE TABLE genre (
@@ -51,19 +57,22 @@ def create_db():
             CREATE TABLE artist (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 full_name TEXT
-            )
+            );
         """
         CREATE_DIRECTORY = """
             CREATE TABLE directory (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                path TEXT
-            )
+                path TEXT,
+                playlist_id INTEGER,
+                FOREIGN KEY(playlist_id) REFERENCES playlist(id)
+            );
         """
         cursor.execute(CREATE_GENRE)
         cursor.execute(CREATE_DIRECTORY)
         cursor.execute(CREATE_ALBUM)
         cursor.execute(CREATE_ARTIST)
         cursor.execute(CREATE_PLAYLIST)
+        cursor.execute(CREATE_MUSIC)
         conn.commit()
         conn.close()
 
@@ -74,7 +83,6 @@ def create_db():
 def scan(scan):
     """Scan directory"""
     Song.scan(scan)
-
 
 
 @click.command()
@@ -115,11 +123,21 @@ def search_album(album):
 
 
 @click.command()
-@click.option("--path", prompt="/path/to/directory", help="add dir which contains music files")
-@click.option("--track", help="/path/to/musicfile")
-def directory(dir, track):
-    if dir:
-        pass
+@click.option("--dir", required=1, prompt="/path/to/directory",
+              help="add dir which contains music files")
+@click.option("--playlist", "-p", help="playlist name")
+def directory(dir, playlist):
+    """ Add dir to the playlist"""
+    if playlist:
+        # if not Playlist.exists(playlist):
+        #     Playlist.create_playlist(playlist)
+        try:
+            p = Playlist.get(playlist)
+        except TypeError:
+            p = Playlist(title=playlist)
+        print(p)
+        print(p.id, p.title)
+
 
 
 mycommands.add_command(scan)
@@ -128,6 +146,7 @@ mycommands.add_command(show_library)
 mycommands.add_command(create_db)
 mycommands.add_command(search_album)
 mycommands.add_command(create_playlist)
+mycommands.add_command(directory)
 
 
 if __name__ == '__main__':
