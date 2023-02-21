@@ -25,9 +25,17 @@ class MusicItem:
         #  TODO: add Dir column in playlist table
         pass
 
-    def create_playlist(self):
-        #  TODO: create and remove playlists
-        pass
+    def create_playlist(self, name):
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        INSERT_QUERY = f"""
+            INSERT INTO playlist (title)
+            VALUES('{name}')
+        """
+        cursor.execute(INSERT_QUERY)
+        conn.commit()
+        conn.close()
+
 
     def search(self):
         #  TODO: find album, artist, genre, music with one code

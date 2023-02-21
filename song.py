@@ -8,6 +8,7 @@ import sqlite3
 
 class Song(MusicItem):
 
+    # TODO: make @classmethod to instantiate music items
     def add_song(self, tags, title, artist, album, genre, filename):
         if filename.endswith(MUS_FORMATS):
             try:

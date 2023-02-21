@@ -3,6 +3,8 @@
 # from artist import Artist
 from song import Song
 from album import Album
+from music_item import MusicItem
+from playlist import Playlist
 import click
 import os
 import mutagen
@@ -25,9 +27,11 @@ def create_db():
             CREATE TABLE playlist (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT,
+                directory_id INTEGER,
                 artist_id INTEGER,
                 genre_id INTEGER,
                 album_id INTEGER,
+                FOREIGN KEY (directory_id) REFERENCES directory (id),
                 FOREIGN KEY (genre_id) REFERENCES genre (id),
                 FOREIGN KEY(artist_id) REFERENCES artist(id),
                 FOREIGN KEY(album_id) REFERENCES album(id)
@@ -49,7 +53,14 @@ def create_db():
                 full_name TEXT
             )
         """
+        CREATE_DIRECTORY = """
+            CREATE TABLE directory (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                path TEXT
+            )
+        """
         cursor.execute(CREATE_GENRE)
+        cursor.execute(CREATE_DIRECTORY)
         cursor.execute(CREATE_ALBUM)
         cursor.execute(CREATE_ARTIST)
         cursor.execute(CREATE_PLAYLIST)
@@ -89,6 +100,14 @@ def show_library():
 
 
 @click.command()
+@click.option("--name", required=1, help="playlist name")
+def create_playlist(name):
+    """ create playlist by name """
+    if name:
+        Playlist.create_playlist(name)
+
+
+@click.command()
 @click.option("--album", required=1, type=str, help="Album Title")
 def search_album(album):
     """ This command finds album by title"""
@@ -96,9 +115,9 @@ def search_album(album):
 
 
 @click.command()
-@click.option("--dir", prompt="/path/to/directory", help="add dir which contains music files")
+@click.option("--path", prompt="/path/to/directory", help="add dir which contains music files")
 @click.option("--track", help="/path/to/musicfile")
-def playlist(dir, track):
+def directory(dir, track):
     if dir:
         pass
 
@@ -108,6 +127,7 @@ mycommands.add_command(add_song)
 mycommands.add_command(show_library)
 mycommands.add_command(create_db)
 mycommands.add_command(search_album)
+mycommands.add_command(create_playlist)
 
 
 if __name__ == '__main__':
