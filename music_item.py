@@ -19,7 +19,7 @@ class MusicItem:
         conn.close()
 
     @staticmethod
-    def add_dir_to_playlist(dir):
+    def add_dir(dir):
         #  TODO: add music files from directory to playlist
         #  TODO: use scan method
         #  TODO: add Dir column in playlist table
@@ -34,3 +34,21 @@ class MusicItem:
     def search(self):
         #  TODO: find album, artist, genre, music with one code
         pass
+
+    def db_action_post(query):
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        cursor.execute(query)
+        conn.commit()
+        conn.close()
+
+    def db_action_get(query, many=False):
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        if many:
+            result = cursor.execute(query).fetchall()
+        else:
+            result = cursor.execute(query).fetchone()
+        conn.commit()
+        conn.close()
+        return result

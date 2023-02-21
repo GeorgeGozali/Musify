@@ -65,7 +65,22 @@ class Playlist(MusicItem):
         # TODO: add single song to the playlist
         pass
 
-    def see_playlist(self, playlist=None, many=False):
+    @classmethod
+    def see_playlist(cls, playlist=None, many=False):
+        if playlist:
+            pass
+        else:
+            QUERY = f"""
+                SELECT playlist.title, COUNT(music.playlist_id) as C
+                FROM playlist
+                LEFT JOIN music ON playlist.id=music.playlist_id;
+            """
+            print(cls.db_action_get(QUERY, many=True))
+                # SELECT playlist.title, COUNT(music.id) as Count,
+                # FROM playlist
+                # JOIN music ON playlist.id=music.playlist_id
+                # ORDER BY Count DESC
+
         # TODO: if many True see playlists names and len items
         # TODO: else see len items and items
         pass

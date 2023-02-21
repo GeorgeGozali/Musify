@@ -32,10 +32,12 @@ def create_db():
                 artist_id INTEGER,
                 genre_id INTEGER,
                 album_id INTEGER,
+                playlist_id INTEGER,
                 FOREIGN KEY (directory_id) REFERENCES directory (id),
                 FOREIGN KEY (genre_id) REFERENCES genre (id),
                 FOREIGN KEY(artist_id) REFERENCES artist(id),
-                FOREIGN KEY(album_id) REFERENCES album(id)
+                FOREIGN KEY(album_id) REFERENCES album(id),
+                FOREIGN KEY(playlist_id) REFERENCES playlist(id)
             );
         """
         CREATE_PLAYLIST = """
@@ -94,13 +96,32 @@ def scan(scan):
 @click.option("--album", '-a',  default="Unknown", type=str, help="Album of the song")
 @click.option("--artist",  default="Unknown", type=str, help="Name of the singer")
 @click.option("--playlist", help="name of the playlist")
-def add_song(tags, title, artist, album, genre, filename, playlist):
+@click.option("--fav", default=True, help="add to favorite")
+def add_song(tags, title, artist, album, genre, filename, playlist, fav):
     """This Method is to add a song in a library."""
-    song = Song()
+    # song = Song()
+    if tags:
+        # TODO: add tags to the song and in the db
+        pass
+    if title:
+        # TODO: add title tag to the song
+        pass
+    if genre:
+        # TODO: add genre tag to the song
+        pass
     if album:
-        print(album)
-        song.add_album_to_db(album)
+        # TODO: add album tag to the song
+        # TODO: add song to album
+        pass
+    if artist:
+        # TODO: add artist to the song
+        pass
     if playlist:
+        # TODO: add song to playlist
+        pass
+    if fav:
+        # TODO: add song to favorites
+        # TODO: remove song from favorites
         pass
 
 
@@ -119,7 +140,10 @@ def show_library(playlist):
 def create_playlist(name):
     """ create playlist by name """
     if name:
-        Playlist.create_playlist(name)
+        plist = Playlist.get(name)
+        if not plist:
+            plist = Playlist(title=name)
+            plist.create()
 
 
 @click.command()
