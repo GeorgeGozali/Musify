@@ -159,14 +159,30 @@ def search_album(album):
 @click.option("--playlist", "-p", help="playlist name")
 def directory(dir, playlist):
     """ Add dir to the playlist"""
+    if not os.path.exists(dir):
+        print("Enter directory with valid path")
+        return False
     if playlist:
-        plist = Playlist.get(playlist)
-        if not plist:
+        plist = Playlist.GET(
+            f"SELECT * FROM playlist WHERE  title LIKE '{playlist}'"
+            )
+        if plist:
+            plist = Playlist(*plist[::-1])
+        else:
             plist = Playlist(title=playlist)
-            plist.create()
-        plist.add_dir(dir)
-        print(f"{dir} added to {playlist}")
-
+            plist.CREATE(
+                f"""
+                INSERT INTO playlist (title)
+                VALUES('{playlist}')
+            """)
+        if not plist.have_dir(dir):
+            plist.add_dir(dir)
+            print(f"{dir} added to {playlist}")
+            return True
+        else:
+            print(f"{dir} is already added to {playlist}.")
+            return False
+        
 
 mycommands.add_command(scan)
 mycommands.add_command(add_song)

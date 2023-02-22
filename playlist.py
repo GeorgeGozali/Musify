@@ -7,19 +7,19 @@ class Playlist(MusicItem):
         self.id = id
         self.title = title
 
-    def create(self):
-        conn = sqlite3.connect("database.db")
-        cursor = conn.cursor()
-        INSERT_QUERY = f"""
-            INSERT INTO playlist (title)
-            VALUES('{self.title}')
-        """
-        cursor.execute(INSERT_QUERY)
+    # def create(self):
+    #     conn = sqlite3.connect("database.db")
+    #     cursor = conn.cursor()
+    #     INSERT_QUERY = f"""
+    #         INSERT INTO playlist (title)
+    #         VALUES('{self.title}')
+    #     """
+    #     cursor.execute(INSERT_QUERY)
 
-        self.id = cursor.lastrowid
+    #     self.id = cursor.lastrowid
 
-        conn.commit()
-        conn.close()
+    #     conn.commit()
+    #     conn.close()
 
     """
             # @classmethod
@@ -49,17 +49,28 @@ class Playlist(MusicItem):
         conn.commit()
         conn.close()
 
-    @classmethod
-    def get(cls, playlist):
+    def have_dir(self, directory):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
-        SEARCH_QUERY = f"SELECT * FROM playlist WHERE  title LIKE '{playlist}'"
-        result = cursor.execute(SEARCH_QUERY).fetchone()
+        INSERT_QUERY = f"""
+            SELECT path  FROM directory WHERE playlist_id={self.id};
+            """
+        result = cursor.execute(INSERT_QUERY).fetchone()
         conn.close()
         if result:
-            return Playlist(id=result[0], title=result[1])  # {"id": result[0], "title": result[1]}
-            # print(result[1])
-        return None
+            return True
+        return False
+    # @classmethod
+    # def get(cls, playlist):
+    #     conn = sqlite3.connect("database.db")
+    #     cursor = conn.cursor()
+    #     SEARCH_QUERY = f"SELECT * FROM playlist WHERE  title LIKE '{playlist}'"
+    #     result = cursor.execute(SEARCH_QUERY).fetchone()
+    #     conn.close()
+    #     if result:
+    #         return Playlist(id=result[0], title=result[1])  # {"id": result[0], "title": result[1]}
+    #         # print(result[1])
+    #     return None
 
     def add_song(self, filename):
         # TODO: add single song to the playlist
@@ -94,4 +105,4 @@ class Playlist(MusicItem):
         """
 
     def __str__(self):
-        return self.title
+        return f"{self.title}"

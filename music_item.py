@@ -13,7 +13,6 @@ class MusicItem:
             INSERT INTO album (title, year)
               VALUES('{album}', {year})
             """
-        print(INSERT_QUERY)
         cursor.execute(INSERT_QUERY)
         conn.commit()
         conn.close()
@@ -35,14 +34,14 @@ class MusicItem:
         #  TODO: find album, artist, genre, music with one code
         pass
 
-    def db_action_post(query):
+    def POST(query):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
         cursor.execute(query)
         conn.commit()
         conn.close()
 
-    def db_action_get(query, many=False):
+    def GET(query, many=False):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
         if many:
@@ -51,4 +50,14 @@ class MusicItem:
             result = cursor.execute(query).fetchone()
         conn.commit()
         conn.close()
-        return result
+        if result:
+            return result
+        return None
+
+    def CREATE(self, QUERY):
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        cursor.execute(QUERY)
+        self.id = cursor.lastrowid
+        conn.commit()
+        conn.close()
