@@ -8,9 +8,10 @@ import sqlite3
 
 class Song(MusicItem):
     def __init__(
-            self, title, id=None, favorites=False, directory_id=None, 
+            self, filename, title=None, id=None, favorites=False, directory_id=None, 
             artist_id=None, genre_id=None, album_id=None, playlist_id=None):
         self.id = id
+        self.filename = filename
         self.title = title
         self.favorites = favorites
         self.directory_id = directory_id

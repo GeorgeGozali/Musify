@@ -27,6 +27,7 @@ def create_db():
             CREATE TABLE music (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT,
+                filename TEXT,
                 favorites INTEGER DEFAULT 0,
                 directory_id INTEGER,
                 artist_id INTEGER,
@@ -132,7 +133,7 @@ def show_library(playlist):
     if playlist:
         Playlist.see_playlist(playlist)
     else:
-        Playlist.see_playlist(many=True)
+        Playlist.see_playlist()
 
 
 @click.command()
@@ -140,10 +141,19 @@ def show_library(playlist):
 def create_playlist(name):
     """ create playlist by name """
     if name:
-        plist = Playlist.get(name)
+        plist = Playlist.GET(
+            f"""
+                SELECT * FROM playlist WHERE title LIKE '{name}';
+            """
+        )
         if not plist:
             plist = Playlist(title=name)
-            plist.create()
+            plist.CREATE(
+                f"""
+                    INSERT INTO playlist (title) 
+                    VALUES('{name}');
+                """
+            )
 
 
 @click.command()
@@ -182,17 +192,37 @@ def directory(dir, playlist):
             print("Adding songs to the library...\n")
             songs_list = Song.scan(dir)
             for song in songs_list:
-                song = Song(title=song)
+                song = Song(filename=song)
                 song.CREATE(
                     f"""
-                    INSERT INTO music (title, directory_id, playlist_id)
-                    VALUES('{song.title}', {new_dir}, {plist.id})
+                    INSERT INTO music (filename, directory_id, playlist_id)
+                    VALUES('{song.filename}', {new_dir}, {plist.id})
                 """
                 )
             return True
         else:
             print(f"{dir} is already added to {playlist}.")
             return False
+        
+
+@click.command()
+@click.option("--dir", prompt="dir name",
+              help="remove dir from playlist with its files")
+def delete(dir):
+    """Delete directory and its content by name"""
+    if dir:
+        directory = Song.GET(
+            f"SELECT id FROM directory WHERE  path LIKE '%{dir}'"
+        )
+        if directory:
+            Song.DELETE(f"DELETE FROM directory WHERE id = '{directory[0]}'")
+            Song.DELETE(f"DELETE FROM music WHERE directory_id = '{directory[0]}'")
+            print(f"{dir} has been removed from playlist!")
+            return True
+        else:
+            print(f"{dir} dir does not exists in a playlist")
+            return False
+    return False
         
 
 mycommands.add_command(scan)
@@ -202,6 +232,7 @@ mycommands.add_command(create_db)
 mycommands.add_command(search_album)
 mycommands.add_command(create_playlist)
 mycommands.add_command(directory)
+mycommands.add_command(delete)
 
 
 if __name__ == '__main__':

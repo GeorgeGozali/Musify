@@ -80,16 +80,21 @@ class Playlist(MusicItem):
         pass
 
     @classmethod
-    def see_playlist(cls, playlist=None, many=False):
+    def see_playlist(cls, playlist=None):
         if playlist:
-            pass
+            QUERY = f"""
+                SELECT tit
+            """
         else:
             QUERY = f"""
                 SELECT playlist.title, COUNT(music.playlist_id) as C
                 FROM playlist
                 LEFT JOIN music ON playlist.id=music.playlist_id;
             """
-            print(cls.GET(QUERY, many=True))
+            result = cls.GET(QUERY, many=True)
+            print("[ dir | num ]")
+            for item in result:
+                print(item[0], "|", item[1])
                 # SELECT playlist.title, COUNT(music.id) as Count,
                 # FROM playlist
                 # JOIN music ON playlist.id=music.playlist_id

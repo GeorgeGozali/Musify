@@ -34,10 +34,11 @@ class MusicItem:
         #  TODO: find album, artist, genre, music with one code
         pass
 
-    def POST(query):
+    def DELETE(QUERY):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
-        cursor.execute(query)
+        print(QUERY)
+        cursor.execute(QUERY)
         conn.commit()
         conn.close()
 
