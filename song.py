@@ -7,6 +7,17 @@ import sqlite3
 
 
 class Song(MusicItem):
+    def __init__(
+            self, title, id=None, favorites=False, directory_id=None, 
+            artist_id=None, genre_id=None, album_id=None, playlist_id=None):
+        self.id = id
+        self.title = title
+        self.favorites = favorites
+        self.directory_id = directory_id
+        self.artist_id = artist_id
+        self.genre_id = genre_id
+        self.album_id = album_id
+        self.playlist_id = playlist_id
 
     # TODO: make @classmethod to instantiate music items
     def add_song(self, tags, title, artist, album, genre, filename):
@@ -66,12 +77,19 @@ class Song(MusicItem):
             print(item)
             # for key, value in audio_file.items():
             #     print(f"{key}: {value}")
-            print(audio_file)
-            print()
+            # print(audio_file)
+            # print()
+        return music_list
 
     def __repr__(self):
-        return f"Song.add_song('{self.tags}', '{self.title}', '{self.artist}',\
-            '{self.album}', '{self.genre}', '{self.filename}')"
+        return f"""Song.add_song(
+            '{self.title}', 
+            '{self.favorites}',
+            '{self.directory_id}',
+            '{self.artist_id}', 
+            '{self.genre_id}',
+            '{self.album_id},
+            '{self.playlist_id}')"""
 
     def add_to_favorites(self):
         #  TODO: add music file to favorites

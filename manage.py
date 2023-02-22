@@ -176,8 +176,19 @@ def directory(dir, playlist):
                 VALUES('{playlist}')
             """)
         if not plist.have_dir(dir):
-            plist.add_dir(dir)
-            print(f"{dir} added to {playlist}")
+            new_dir = plist.add_dir(dir)
+            print(f"{dir} added to {playlist}\n")
+            print("Scanning directory...\n")
+            print("Adding songs to the library...\n")
+            songs_list = Song.scan(dir)
+            for song in songs_list:
+                song = Song(title=song)
+                song.CREATE(
+                    f"""
+                    INSERT INTO music (title, directory_id, playlist_id)
+                    VALUES('{song.title}', {new_dir}, {plist.id})
+                """
+                )
             return True
         else:
             print(f"{dir} is already added to {playlist}.")
