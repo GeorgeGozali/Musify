@@ -223,7 +223,26 @@ def delete(dir):
             print(f"{dir} dir does not exists in a playlist")
             return False
     return False
-        
+
+
+@click.command()
+@click.option("--playlist", '-p', help="Choose playlist you want to play")
+@click.option("--song", help="play song by name")
+@click.option("-id", help="play song by id")
+@click.option("--dir", help="play directory by name")
+def play(playlist, song, id, dir):
+    """Play music"""
+    if playlist:
+        playlist = Playlist.GET(f"SELECT id FROM playlist WHERE title='{playlist}'")[0]
+        music_list = Playlist.GET(
+            f"""SELECT music.filename, directory.path
+            FROM music
+            LEFT join directory ON music.directory_id=directory.id
+            """, many=True)
+        play_list = [os.path.join(item[1], item[0]) for item in music_list]
+        Song.play(play_list)
+
+
 
 mycommands.add_command(scan)
 mycommands.add_command(add_song)
@@ -233,6 +252,7 @@ mycommands.add_command(search_album)
 mycommands.add_command(create_playlist)
 mycommands.add_command(directory)
 mycommands.add_command(delete)
+mycommands.add_command(play)
 
 
 if __name__ == '__main__':

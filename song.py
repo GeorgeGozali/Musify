@@ -2,8 +2,11 @@ from music_item import MusicItem, MUS_FORMATS
 import mutagen
 from mutagen.easyid3 import EasyID3
 from mutagen.id3 import ID3NoHeaderError, ID3, TPE1, TIT2, TALB
+# from playsound import playsound
 import os
 import sqlite3
+from pydub import AudioSegment
+from pydub.playback import play
 
 
 class Song(MusicItem):
@@ -82,12 +85,30 @@ class Song(MusicItem):
             # print()
         return music_list
 
+    @staticmethod
+    def play(music):
+        if len(music) == 1:
+            music = [music]
+        for item in music:
+            if item.endswith('.mp3'):
+                song = AudioSegment.from_mp3(item)
+                print(f"playing: {item.split('/')[-1]}")
+                play(song)
+            if item.endswith('.wav'):
+                song = AudioSegment.from_wav(item)
+                print(f"playing: {item.split('/')[-1]}")
+                play(song)
+            if item.endswith('.flac'):
+                song = AudioSegment.from_file(item, "flac")
+                print(f"playing: {item.split('/')[-1]}")
+                play(song)
+
     def __repr__(self):
         return f"""Song.add_song(
-            '{self.title}', 
+            '{self.title}',
             '{self.favorites}',
             '{self.directory_id}',
-            '{self.artist_id}', 
+            '{self.artist_id}',
             '{self.genre_id}',
             '{self.album_id},
             '{self.playlist_id}')"""
