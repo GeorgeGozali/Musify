@@ -62,3 +62,19 @@ class MusicItem:
         self.id = cursor.lastrowid
         conn.commit()
         conn.close()
+
+    @staticmethod
+    def plus_one(filename):
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        GET_QUERY = f"SELECT played FROM music WHERE filename ='{filename}'"
+        played_num = int(cursor.execute(GET_QUERY).fetchone()[0])
+        POST_QUERY = f"""
+            UPDATE music SET played = {played_num + 1}
+            WHERE filename = '{filename}';
+        """
+        cursor.execute(POST_QUERY)
+        # self.id = cursor.lastrowid
+        print(played_num, filename)
+        conn.commit()
+        conn.close()

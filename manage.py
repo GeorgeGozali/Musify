@@ -29,6 +29,7 @@ def create_db():
                 title TEXT,
                 filename TEXT,
                 favorites INTEGER DEFAULT 0,
+                played INTEGER DEFAULT 0,
                 directory_id INTEGER,
                 artist_id INTEGER,
                 genre_id INTEGER,
@@ -233,14 +234,18 @@ def delete(dir):
 def play(playlist, song, id, dir):
     """Play music"""
     if playlist:
-        playlist = Playlist.GET(f"SELECT id FROM playlist WHERE title='{playlist}'")[0]
+        id = Playlist.GET(f"SELECT id FROM playlist WHERE title='{playlist}'")[0]
         music_list = Playlist.GET(
             f"""SELECT music.filename, directory.path
             FROM music
             LEFT join directory ON music.directory_id=directory.id
+            WHERE music.playlist_id ='{id}';
             """, many=True)
         play_list = [os.path.join(item[1], item[0]) for item in music_list]
         Song.play(play_list)
+    elif song:
+        pass
+    
 
 
 

@@ -90,18 +90,25 @@ class Song(MusicItem):
         if len(music) == 1:
             music = [music]
         for item in music:
+
+            name = item.split('/')[-1]
+            to_print = f"\nplaying: {name}\n"
+            Song.plus_one(name)
+
             if item.endswith('.mp3'):
                 song = AudioSegment.from_mp3(item)
-                print(f"playing: {item.split('/')[-1]}")
+                print(to_print)
                 play(song)
-            if item.endswith('.wav'):
+            elif item.endswith('.wav'):
                 song = AudioSegment.from_wav(item)
-                print(f"playing: {item.split('/')[-1]}")
+                print(to_print)
                 play(song)
-            if item.endswith('.flac'):
+            elif item.endswith('.flac'):
                 song = AudioSegment.from_file(item, "flac")
-                print(f"playing: {item.split('/')[-1]}")
+                print(to_print)
                 play(song)
+            else:
+                print(f"\ncan`t play {name}\n")
 
     def __repr__(self):
         return f"""Song.add_song(
