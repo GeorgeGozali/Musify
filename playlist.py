@@ -50,7 +50,7 @@ class Playlist(MusicItem):
         #     return None
     """
 
-    def add_dir(self, directory):
+    def add_dir(self, directory: str):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
         INSERT_QUERY = f"""
@@ -62,7 +62,7 @@ class Playlist(MusicItem):
         conn.close()
         return cursor.lastrowid
 
-    def have_dir(self, directory):
+    def have_dir(self, directory: str):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
         INSERT_QUERY = f"""

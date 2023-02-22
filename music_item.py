@@ -34,7 +34,8 @@ class MusicItem:
         #  TODO: find album, artist, genre, music with one code
         pass
 
-    def DELETE(QUERY):
+    @staticmethod
+    def DELETE(QUERY: str):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
         print(QUERY)
@@ -42,7 +43,8 @@ class MusicItem:
         conn.commit()
         conn.close()
 
-    def GET(query, many=False):
+    @staticmethod
+    def GET(query: str, many=False):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
         if many:
@@ -55,7 +57,7 @@ class MusicItem:
             return result
         return None
 
-    def CREATE(self, QUERY):
+    def CREATE(self, QUERY: str):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
         cursor.execute(QUERY)
@@ -64,7 +66,7 @@ class MusicItem:
         conn.close()
 
     @staticmethod
-    def plus_one(filename):
+    def plus_one(filename: str):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
         GET_QUERY = f"SELECT played FROM music WHERE filename ='{filename}'"

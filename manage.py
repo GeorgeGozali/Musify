@@ -245,8 +245,6 @@ def play(playlist, song, id, dir):
         Song.play(play_list)
     elif song:
         pass
-    
-
 
 
 mycommands.add_command(scan)

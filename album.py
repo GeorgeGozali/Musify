@@ -38,7 +38,7 @@ class Album(MusicItem):
         return self.title
 
     @classmethod
-    def search(cls, title):
+    def search(cls, title: str):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
         SEARCH_QUERY = f"""
