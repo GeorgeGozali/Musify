@@ -122,7 +122,7 @@ class Song(MusicItem):
     def add_tags(json_file: str, filename: str):
         with open(json_file) as f:
             data = json.load(f)
-            print(data)
+            # print(data)
             Song.add_song(
                 title=data['title'],
                 artist=data['artist'],

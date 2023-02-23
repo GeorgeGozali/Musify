@@ -93,7 +93,7 @@ def scan(dir):
 
 
 @click.command()
-@click.option("--filename", required=0, type=str, help="/path/to/filename")
+@click.option("--filename", required=0, type=str, help="/path/to/filename", prompt="asdad")
 @click.option("--tags", default="Unknown", type=str, help="/path/to/song/tag/json/data")
 @click.option("--title", "-t", default="Unknown", type=str, help="Title of the song")
 @click.option("--genre", "-g",  default="Unknown", type=str, help="Genre of the song")
@@ -176,7 +176,7 @@ def search_album(album):
 def directory(dir, playlist):
     """ Add dir to the playlist"""
     if not os.path.exists(dir):
-        print("Enter directory with valid path")
+        click.echo("Enter directory with valid path")
         return False
     if playlist:
         plist = Playlist.GET(
@@ -193,9 +193,9 @@ def directory(dir, playlist):
             """)
         if not plist.have_dir(dir):
             new_dir = plist.add_dir(dir)
-            print(f"{dir} added to {playlist}\n")
-            print("Scanning directory...\n")
-            print("Adding songs to the library...\n")
+            click.echo(f"{dir} added to {playlist}\n")
+            click.echo("Scanning directory...\n")
+            click.echo("Adding songs to the library...\n")
             songs_list = Song.scan(dir)
             for song in songs_list:
                 song = Song(filename=song)
@@ -207,7 +207,7 @@ def directory(dir, playlist):
                 )
             return True
         else:
-            print(f"{dir} is already added to {playlist}.")
+            click.echo(f"{dir} is already added to {playlist}.")
             return False
         
 
@@ -223,10 +223,10 @@ def delete(dir):
         if directory:
             Song.DELETE(f"DELETE FROM directory WHERE id = '{directory[0]}'")
             Song.DELETE(f"DELETE FROM music WHERE directory_id = '{directory[0]}'")
-            print(f"{dir} has been removed from playlist!")
+            click.echo(f"{dir} has been removed from playlist!")
             return True
         else:
-            print(f"{dir} dir does not exists in a playlist")
+            click.echo(f"{dir} dir does not exists in a playlist")
             return False
     return False
 
