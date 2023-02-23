@@ -83,10 +83,18 @@ class Playlist(MusicItem):
     def see_playlist(cls, playlist=None):
         if playlist:
             QUERY = f"""
-                SELECT tit
+                SELECT id FROM playlist WHERE title LIKE '{playlist}';
             """
+            playlist_id = cls.GET(QUERY)[0]
+            GET_SONGS = f"""
+                SELECT id, filename FROM music
+                WHERE playlist_id = '{playlist_id}';
+            """
+            result = cls.GET(GET_SONGS, many=True)
+            for item in result:
+                print(f"{item[0]}:  {item[1]}")
         else:
-            QUERY = f"""
+            QUERY = """
                 SELECT playlist.title, COUNT(music.playlist_id) as C
                 FROM playlist
                 LEFT JOIN music ON playlist.id=music.playlist_id;
@@ -95,10 +103,7 @@ class Playlist(MusicItem):
             print("[ dir | num ]")
             for item in result:
                 print(item[0], "|", item[1])
-                # SELECT playlist.title, COUNT(music.id) as Count,
-                # FROM playlist
-                # JOIN music ON playlist.id=music.playlist_id
-                # ORDER BY Count DESC
+
 
         # TODO: if many True see playlists names and len items
         # TODO: else see len items and items

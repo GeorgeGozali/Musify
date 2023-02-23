@@ -99,7 +99,10 @@ def scan(scan):
 @click.option("--artist",  default="Unknown", type=str, help="Name of the singer")
 @click.option("--playlist", help="name of the playlist")
 @click.option("--fav", default=True, help="add to favorite")
-def add_song(tags, title, artist, album, genre, filename, playlist, fav):
+def add_song(
+    tags: str, title: str, artist: str, album: str, genre: str,
+    filename: str, playlist: str, fav: bool
+):
     """This Method is to add a song in a library."""
     # song = Song()
     if tags:
@@ -229,22 +232,34 @@ def delete(dir):
 @click.command()
 @click.option("--playlist", '-p', help="Choose playlist you want to play")
 @click.option("--song", help="play song by name")
-@click.option("-id", help="play song by id")
+@click.option("--id", help="play song by id")
 @click.option("--dir", help="play directory by name")
 def play(playlist, song, id, dir):
     """Play music"""
     if playlist:
-        id = Playlist.GET(f"SELECT id FROM playlist WHERE title='{playlist}'")[0]
+        playlist_id = Playlist.GET(f"SELECT id FROM playlist WHERE title='{playlist}'")[0]
         music_list = Playlist.GET(
             f"""SELECT music.filename, directory.path
             FROM music
             LEFT join directory ON music.directory_id=directory.id
-            WHERE music.playlist_id ='{id}';
+            WHERE music.playlist_id ='{playlist_id}';
             """, many=True)
-        play_list = [os.path.join(item[1], item[0]) for item in music_list]
+        play_list = [Song.path_plus_filename(item) for item in music_list]
         Song.play(play_list)
     elif song:
         pass
+    elif id:
+        music_file = Playlist.GET(
+            f"""SELECT music.filename, directory.path
+            FROM music
+            LEFT join directory ON music.directory_id=directory.id
+            WHERE music.id ='{id}';
+            """)
+        song_filename = Song.path_plus_filename(music_file)
+        # print(song_filename)
+        Song.play(song_filename)
+        
+
 
 
 mycommands.add_command(scan)

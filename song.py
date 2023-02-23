@@ -56,9 +56,8 @@ class Song(MusicItem):
 
     @staticmethod
     def scan(directory: str):
-        formats = ('.mp3', '.wav', '.aac', '.flac')
         dir_list = os.listdir(directory)
-        music_list = [item for item in dir_list if item.endswith(formats)]
+        music_list = [item for item in dir_list if item.endswith(MUS_FORMATS)]
 
         for item in music_list:
             filename = os.path.join(directory, item)
@@ -86,29 +85,28 @@ class Song(MusicItem):
         return music_list
 
     @staticmethod
-    def play(music):
-        if len(music) == 1:
+    def play(music: list[str] | str) -> None:
+        if isinstance(music, str):
             music = [music]
         for item in music:
+            if item.endswith(MUS_FORMATS):
+                name = item.split('/')[-1]
+                format = name.split(".")[-1]
+            try:
+                Song.plus_one(name)
+                song = AudioSegment.from_file(item, format)
 
-            name = item.split('/')[-1]
-            to_print = f"\nplaying: {name}\n"
-            Song.plus_one(name)
+                print(f"\nplaying: {name}\n")
+                play(song)
 
-            if item.endswith('.mp3'):
-                song = AudioSegment.from_mp3(item)
-                print(to_print)
-                play(song)
-            elif item.endswith('.wav'):
-                song = AudioSegment.from_wav(item)
-                print(to_print)
-                play(song)
-            elif item.endswith('.flac'):
-                song = AudioSegment.from_file(item, "flac")
-                print(to_print)
-                play(song)
-            else:
+            except Exception:
                 print(f"\ncan`t play {name}\n")
+
+    @staticmethod
+    def path_plus_filename(item: tuple[str]):
+        if len(item) == 2:
+            return os.path.join(item[1], item[0])
+        return False
 
     def __repr__(self):
         return f"""Song.add_song(
