@@ -4,9 +4,9 @@ from mutagen.easyid3 import EasyID3
 from mutagen.id3 import ID3NoHeaderError, ID3, TPE1, TIT2, TALB
 # from playsound import playsound
 import os
-import sqlite3
 from pydub import AudioSegment
 from pydub.playback import play
+import json
 
 
 class Song(MusicItem):
@@ -24,7 +24,8 @@ class Song(MusicItem):
         self.playlist_id = playlist_id
 
     # TODO: make @classmethod to instantiate music items
-    def add_song(self, tags, title, artist, album, genre, filename):
+    @staticmethod
+    def add_song(title, artist, album, genre, filename):
         if filename.endswith(MUS_FORMATS):
             try:
                 audio_file = EasyID3(filename)
@@ -77,11 +78,6 @@ class Song(MusicItem):
                     audio_file.add(TIT2(encoding=3, text=u'Unknown title'))
                     audio_file.add(TALB(encoding=3, text=u'Unknown album'))
                     audio_file.save(os.path.join(filename))
-            print(item)
-            # for key, value in audio_file.items():
-            #     print(f"{key}: {value}")
-            # print(audio_file)
-            # print()
         return music_list
 
     @staticmethod
@@ -121,3 +117,15 @@ class Song(MusicItem):
     def add_to_favorites(self):
         #  TODO: add music file to favorites
         pass
+
+    @staticmethod
+    def add_tags(json_file: str, filename: str):
+        with open(json_file) as f:
+            data = json.load(f)
+            print(data)
+            Song.add_song(
+                title=data['title'],
+                artist=data['artist'],
+                album=data['album'],
+                genre=data['genre'],
+                filename=filename)

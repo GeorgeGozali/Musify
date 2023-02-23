@@ -76,7 +76,5 @@ class MusicItem:
             WHERE filename = '{filename}';
         """
         cursor.execute(POST_QUERY)
-        # self.id = cursor.lastrowid
-        print(played_num, filename)
         conn.commit()
         conn.close()

@@ -3,12 +3,10 @@
 # from artist import Artist
 from song import Song
 from album import Album
-from music_item import MusicItem
 from playlist import Playlist
 import click
 import os
 import mutagen
-from mutagen.flac import FLAC
 import sqlite3
 
 
@@ -84,10 +82,14 @@ def create_db():
 
 # TODO: this command should not run without this > --scan', '-s'
 @click.command()
-@click.option('--scan', '-s', default='m/', required=True, help='/path/to/directory')
-def scan(scan):
+@click.option('--dir', '-d', default='m/', required=True, help='/path/to/directory')
+def scan(dir):
     """Scan directory"""
-    Song.scan(scan)
+    print(f"\nscaning... {dir}\n")
+    music_list = Song.scan(dir)
+    print(f"There are {len(music_list)} music files in {dir}\n")
+    for item in music_list:
+        print(item)
 
 
 @click.command()
@@ -105,9 +107,9 @@ def add_song(
 ):
     """This Method is to add a song in a library."""
     # song = Song()
-    if tags:
+    if tags and filename:
         # TODO: add tags to the song and in the db
-        pass
+        Song.add_tags(json_file="/home/george/Music/tags/test.json", filename=filename)
     if title:
         # TODO: add title tag to the song
         pass
@@ -231,10 +233,10 @@ def delete(dir):
 
 @click.command()
 @click.option("--playlist", '-p', help="Choose playlist you want to play")
-@click.option("--song", help="play song by name")
+@click.option("--title", help="play song by name")
 @click.option("--id", help="play song by id")
 @click.option("--dir", help="play directory by name")
-def play(playlist, song, id, dir):
+def play(playlist, title, id, dir):
     """Play music"""
     if playlist:
         playlist_id = Playlist.GET(f"SELECT id FROM playlist WHERE title='{playlist}'")[0]
@@ -246,7 +248,7 @@ def play(playlist, song, id, dir):
             """, many=True)
         play_list = [Song.path_plus_filename(item) for item in music_list]
         Song.play(play_list)
-    elif song:
+    elif title:
         pass
     elif id:
         music_file = Playlist.GET(
@@ -256,10 +258,11 @@ def play(playlist, song, id, dir):
             WHERE music.id ='{id}';
             """)
         song_filename = Song.path_plus_filename(music_file)
-        # print(song_filename)
         Song.play(song_filename)
-        
-
+    elif dir:
+        music_list = Song.scan(dir)
+        play_list = [Song.path_plus_filename((item, dir)) for item in music_list]
+        Song.play(play_list)
 
 
 mycommands.add_command(scan)
