@@ -142,7 +142,7 @@ def show(playlist, fav):
                 SELECT music.filename, directory.path
                 FROM music
                 LEFT join directory ON music.directory_id=directory.id
-                WHERE music.id =1;
+                WHERE music.favorites =1;
                 """, many=True)
             if len(fav_list) > 0:
                 print("Your favorite tracks, if you want to play, go <play-fav> method\n")
@@ -288,7 +288,7 @@ def play_fav():
         """SELECT music.filename, directory.path
         FROM music
         LEFT join directory ON music.directory_id=directory.id
-        WHERE music.id =1;
+        WHERE music.favorites =1;
         """, many=True)
     play_list = [Song.path_plus_filename(item) for item in music_list]
     Song.play(play_list)
