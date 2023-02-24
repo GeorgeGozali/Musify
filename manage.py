@@ -100,7 +100,7 @@ def scan(dir):
 @click.option("--album", '-a', type=str, help="Album of the song")
 @click.option("--artist",  type=str, help="Name of the singer")
 @click.option("--playlist", help="name of the playlist")
-@click.option("--fav", default=False, help="add to favorite")
+@click.option("--fav", default=0, help="add to favorite")
 def add_song(
     filename, fav, **kwargs
 ):
@@ -115,11 +115,19 @@ def add_song(
         # TODO: add tags to the song and in the db
         Song.add_tags_from_json(
             json_file="/home/george/Music/tags/test.json", filename=filename)
-    if fav:
-    #     # TODO: add song to favorites
-    #     # TODO: remove song from favorites
-    #     pass
-
+    if fav in (0, 1):
+        if fav:
+            if Song.is_favorite(filename):
+                print("\nThis song is already in favorites")
+            else:
+                Song.favorites(filename=filename, arg=fav)
+                print("\nThat song added to favorites")
+        else:
+            if not Song.is_favorite(filename):
+                print("\nThis song is not in favorites, do you want to add?")
+            else:
+                Song.favorites(filename=filename, arg=fav)
+                print("\nThat song removed from favorites")          
 
 @click.command()
 @click.option("--playlist", help="playlist name")

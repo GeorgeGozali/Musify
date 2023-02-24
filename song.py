@@ -110,10 +110,6 @@ class Song(MusicItem):
             '{self.album_id},
             '{self.playlist_id}')"""
 
-    def add_to_favorites(self):
-        #  TODO: add music file to favorites
-        pass
-
     @staticmethod
     def add_tags_from_json(json_file: str, filename: str):
         with open(json_file) as f:
@@ -124,3 +120,21 @@ class Song(MusicItem):
                 album=data['album'],
                 genre=data['genre'],
                 filename=filename)
+
+    @staticmethod
+    def is_favorite(filename):
+        result = Song.GET(
+            f"""
+                SELECT favorites FROM music
+                WHERE filename = '{filename.split("/")[-1]}'
+            """)[0]
+        return result
+
+    @classmethod
+    def favorites(cls, filename: str, arg: int):
+        Song.UPDATE(
+            filename=filename.split("/")[-1],
+            table="music",
+            col="favorites",
+            arg=arg
+        )

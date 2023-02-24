@@ -78,3 +78,15 @@ class MusicItem:
         cursor.execute(POST_QUERY)
         conn.commit()
         conn.close()
+
+    @staticmethod
+    def UPDATE(filename: str, table: str, col: str, arg):
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        UPDATE_QUERY = f"""
+            UPDATE {table} SET {col} = {arg}
+            WHERE filename = '{filename}';
+        """
+        cursor.execute(UPDATE_QUERY)
+        conn.commit()
+        conn.close()
