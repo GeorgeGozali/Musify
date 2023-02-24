@@ -23,10 +23,13 @@ class Song(MusicItem):
         self.album_id = album_id
         self.playlist_id = playlist_id
 
-    # TODO: make @classmethod to instantiate music items
     @staticmethod
-    def add_song(title, artist, album, genre, filename):
-        if filename.endswith(MUS_FORMATS):
+    def add_tags(
+        filename,
+        args_dict: dict
+    ):
+
+        if filename and filename.endswith(MUS_FORMATS):
             try:
                 audio_file = EasyID3(filename)
             except mutagen.id3.ID3NoHeaderError:
@@ -34,19 +37,12 @@ class Song(MusicItem):
                 audio_file.add_tags()  # (ID3=EasyID3)
 
             try:
-                audio_file['title'] = title
-                audio_file['artist'] = artist
-                audio_file['album'] = album
-                audio_file['genre'] = genre
+                for key, value in args_dict.items():
+                    if value is not None:
+                        audio_file[key] = value
                 audio_file.save(filename)
-                # print(audio_file)
             except TypeError:
                 pass
-        # changed = EasyID3(filename)
-        # for k, v in changed.items():
-        #     print(f"{k}: {v}")
-        # return audio_file
-        # self.add_song_to_db(audio_file)
 
     def add_song_to_db(self, audio_file):
         ADD_TO_DB = """
@@ -119,11 +115,10 @@ class Song(MusicItem):
         pass
 
     @staticmethod
-    def add_tags(json_file: str, filename: str):
+    def add_tags_from_json(json_file: str, filename: str):
         with open(json_file) as f:
             data = json.load(f)
-            # print(data)
-            Song.add_song(
+            Song.add_tags(
                 title=data['title'],
                 artist=data['artist'],
                 album=data['album'],

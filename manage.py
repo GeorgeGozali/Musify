@@ -93,43 +93,32 @@ def scan(dir):
 
 
 @click.command()
-@click.option("--filename", required=0, type=str, help="/path/to/filename", prompt="asdad")
-@click.option("--tags", default="Unknown", type=str, help="/path/to/song/tag/json/data")
-@click.option("--title", "-t", default="Unknown", type=str, help="Title of the song")
-@click.option("--genre", "-g",  default="Unknown", type=str, help="Genre of the song")
-@click.option("--album", '-a',  default="Unknown", type=str, help="Album of the song")
-@click.option("--artist",  default="Unknown", type=str, help="Name of the singer")
+@click.option("--filename", required=1, type=str, help="/path/to/filename")
+@click.option("--tags", type=str, help="/path/to/json_data")
+@click.option("--title", "-t", type=str, help="Title of the song")
+@click.option("--genre", "-g",  type=str, help="Genre of the song")
+@click.option("--album", '-a', type=str, help="Album of the song")
+@click.option("--artist",  type=str, help="Name of the singer")
 @click.option("--playlist", help="name of the playlist")
-@click.option("--fav", default=True, help="add to favorite")
+@click.option("--fav", default=False, help="add to favorite")
 def add_song(
-    tags: str, title: str, artist: str, album: str, genre: str,
-    filename: str, playlist: str, fav: bool
+    filename, fav, **kwargs
 ):
     """This Method is to add a song in a library."""
-    # song = Song()
-    if tags and filename:
+
+    # Add Tags, if user inputs any of them
+    if any(kwargs.values()):
+        Song.add_tags(filename, kwargs)
+
+    # Add Tags, if user adds json file of tags
+    if kwargs['tags']:
         # TODO: add tags to the song and in the db
-        Song.add_tags(json_file="/home/george/Music/tags/test.json", filename=filename)
-    if title:
-        # TODO: add title tag to the song
-        pass
-    if genre:
-        # TODO: add genre tag to the song
-        pass
-    if album:
-        # TODO: add album tag to the song
-        # TODO: add song to album
-        pass
-    if artist:
-        # TODO: add artist to the song
-        pass
-    if playlist:
-        # TODO: add song to playlist
-        pass
+        Song.add_tags_from_json(
+            json_file="/home/george/Music/tags/test.json", filename=filename)
     if fav:
-        # TODO: add song to favorites
-        # TODO: remove song from favorites
-        pass
+    #     # TODO: add song to favorites
+    #     # TODO: remove song from favorites
+    #     pass
 
 
 @click.command()
@@ -156,7 +145,7 @@ def create_playlist(name):
             plist = Playlist(title=name)
             plist.CREATE(
                 f"""
-                    INSERT INTO playlist (title) 
+                    INSERT INTO playlist (title)
                     VALUES('{name}');
                 """
             )
