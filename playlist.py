@@ -94,8 +94,11 @@ class Playlist(MusicItem):
                 WHERE playlist_id = '{playlist_id}';
             """
             result = cls.GET(GET_SONGS, many=True)
-            for item in result:
-                print(f"{item[0]}:  {item[1]}")
+            try:
+                for item in result:
+                    print(f"{item[0]}:  {item[1]}")
+            except TypeError:
+                return f"playlist: {playlist} doesn`t contans any songs!"
         else:
             QUERY = """
                 SELECT playlist.title, COUNT(music.playlist_id) as C

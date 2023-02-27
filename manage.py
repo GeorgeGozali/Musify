@@ -115,7 +115,6 @@ def add(
         # TODO: add tags to the song and in the db
         Song.add_tags_from_json(
             json_file="/home/george/Music/tags/test.json", filename=filename)
-    click.echo(fav)
     if fav:
         if Song.is_favorite(filename):
             click.echo("\nThis song is already in favorites")
@@ -132,40 +131,15 @@ def add(
 
 
 @click.command()
-@click.option("--playlist", help="playlist name")
+@click.option("--name", "-n", required=0, help="playlist name")
 @click.option("--fav", is_flag=True, help="see favorites")
-def show(playlist, fav):
-    """Shows library"""
-    if playlist:
-        click.echo(Playlist.see_playlist(playlist))
-    elif fav:
-        fav_list = Song.GET("""
-            SELECT music.filename, directory.path
-            FROM music
-            LEFT join directory ON music.directory_id=directory.id
-            WHERE music.favorites =1;
-            """, many=True)
-        if len(fav_list) > 0:
-            click.echo("Your favorite tracks, if you want to play, go <play --fav> method\n")
-            for item in fav_list:
-                click.echo(item[0])
-        else:
-            click.echo(
-                "You have no favorites,\
-                    if you want to add go <add --fav> \
-                        \nmethod with --filename")
-    else:
-        Playlist.see_playlist()
-
-
-@click.command()
-@click.option("--name", required=1, help="playlist name")
-def playlist(name):
-    """ create playlist by name """
-    if name:
+@click.option("--create", '-c', is_flag=True, help="create new playlist")
+def playlist(name, fav, create):
+    """ create or show playlist by name"""
+    if name and create:
         plist = Playlist.GET(
             f"""
-                SELECT * FROM playlist WHERE title LIKE '{name}';
+                SELECT title FROM playlist WHERE title like '{name}';
             """
         )
         if not plist:
@@ -176,6 +150,31 @@ def playlist(name):
                     VALUES('{name}');
                 """
             )
+            click.echo(f"playlit: {name} has created!")
+        else:
+            click.echo(f"{name} already exists")
+    elif name:
+        click.echo(Playlist.see_playlist(name))
+        # print(plist)
+    elif fav:
+        fav_list = Song.GET("""
+            SELECT music.filename, directory.path
+            FROM music
+            LEFT join directory ON music.directory_id=directory.id
+            WHERE music.favorites =1;
+            """, many=True)
+        if fav_list:
+            if len(fav_list) > 0:
+                click.echo("Your favorite tracks, if you want to play, go <play --fav> method\n")
+                for item in fav_list:
+                    click.echo(item[0])
+        else:
+            click.echo(
+                "You have no favorites,\
+                    \nif you want to add go <add --fav> \
+                        \nmethod with --filename")
+    else:
+        Playlist.see_playlist()
 
 
 @click.command()
@@ -291,10 +290,9 @@ def play(playlist, title, id, dir, fav):
 
 mycommands.add_command(scan)
 mycommands.add_command(add)
-mycommands.add_command(show)
+mycommands.add_command(playlist)
 mycommands.add_command(create_db)
 mycommands.add_command(search_album)
-mycommands.add_command(playlist)
 mycommands.add_command(directory)
 mycommands.add_command(play)
 
