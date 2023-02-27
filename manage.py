@@ -85,11 +85,11 @@ def create_db():
 @click.option('--dir', '-d', default='m/', required=True, help='/path/to/directory')
 def scan(dir):
     """Scan directory"""
-    print(f"\nscaning... {dir}\n")
+    click.echo(f"\nscaning... {dir}\n")
     music_list = Song.scan(dir)
-    print(f"There are {len(music_list)} music files in {dir}\n")
+    click.echo(f"There are {len(music_list)} music files in {dir}\n")
     for item in music_list:
-        print(item)
+        click.echo(item)
 
 
 @click.command()
@@ -99,9 +99,10 @@ def scan(dir):
 @click.option("--genre", "-g",  type=str, help="Genre of the song")
 @click.option("--album", '-a', type=str, help="Album of the song")
 @click.option("--artist",  type=str, help="Name of the singer")
-@click.option("--fav", default=0, help="add to favorite")
+@click.option("--fav", is_flag=True, help="add to favorites")
+@click.option("--rmfav", '-rf', is_flag=True, help="remove from favorites")
 def add(
-    filename, fav, **kwargs
+    filename, fav, rmfav, **kwargs
 ):
     """This Method is to add a song in a library."""
 
@@ -114,19 +115,20 @@ def add(
         # TODO: add tags to the song and in the db
         Song.add_tags_from_json(
             json_file="/home/george/Music/tags/test.json", filename=filename)
-    if fav in (0, 1):
-        if fav:
-            if Song.is_favorite(filename):
-                print("\nThis song is already in favorites")
-            else:
-                Song.favorites(filename=filename, arg=fav)
-                print("\nThat song added to favorites")
+    click.echo(fav)
+    if fav:
+        if Song.is_favorite(filename):
+            click.echo("\nThis song is already in favorites")
+            click.echo("if you want to remove, go with <--rmfav> or <-rf>")
         else:
-            if not Song.is_favorite(filename):
-                print("\nThis song is not in favorites, do you want to add?")
-            else:
-                Song.favorites(filename=filename, arg=fav)
-                print("\nThat song removed from favorites")
+            Song.favorites(filename=filename, arg=fav)
+            click.echo("\nThat song added to favorites")
+    elif rmfav:
+        if not Song.is_favorite(filename):
+            click.echo("\nThis song is not in favorites, do you want to add?")
+        else:
+            Song.favorites(filename=filename, arg=fav)
+            click.echo("\nThat song removed from favorites")
 
 
 @click.command()
@@ -135,7 +137,7 @@ def add(
 def show(playlist, fav):
     """Shows library"""
     if playlist:
-        Playlist.see_playlist(playlist)
+        click.echo(Playlist.see_playlist(playlist))
     elif fav:
         fav_list = Song.GET("""
             SELECT music.filename, directory.path
@@ -144,14 +146,14 @@ def show(playlist, fav):
             WHERE music.favorites =1;
             """, many=True)
         if len(fav_list) > 0:
-            print("Your favorite tracks, if you want to play, go <play-fav> method\n")
+            click.echo("Your favorite tracks, if you want to play, go <play --fav> method\n")
             for item in fav_list:
                 click.echo(item[0])
         else:
             click.echo(
                 "You have no favorites,\
-                    if you want to add go <add-song> \
-                        \nmethod vis argument --fav and --filename")
+                    if you want to add go <add --fav> \
+                        \nmethod with --filename")
     else:
         Playlist.see_playlist()
 
@@ -180,7 +182,7 @@ def playlist(name):
 @click.option("--album", required=1, type=str, help="Album Title")
 def search_album(album):
     """ This command finds album by title"""
-    print(Album.search(album))
+    click.echo(Album.search(album))
 
 
 @click.command()
@@ -188,14 +190,14 @@ def search_album(album):
     "--dir", required=1,
     help="add dir path which contains music files")
 @click.option("--playlist", "-p", help="playlist name")
-@click.option("--dlt", help="type yes")
-def directory(dir, playlist, dlt):
+@click.option("--delete", is_flag=True, help="delete directory with its music files")
+def directory(dir, playlist, delete):
     """ Add/remove dir to/from the playlist"""
     if not os.path.exists(dir):
         click.echo("Enter directory with valid path")
         return False
 
-    elif playlist and not dlt:
+    elif playlist and not delete:
         plist = Playlist.GET(
             f"SELECT * FROM playlist WHERE  title LIKE '{playlist}'"
             )
@@ -226,7 +228,7 @@ def directory(dir, playlist, dlt):
         else:
             click.echo(f"{dir} is already added to {playlist}.")
             return False
-    elif dlt.lower() in ("yes", "y"):
+    elif delete:
         confirm = input(f"Do you realy want to delete {dir}? (yes/no) ")
         if confirm.lower() in ("yes", "y"):
             directory = Song.GET(

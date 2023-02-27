@@ -85,7 +85,10 @@ class Playlist(MusicItem):
             QUERY = f"""
                 SELECT id FROM playlist WHERE title LIKE '{playlist}';
             """
-            playlist_id = cls.GET(QUERY)[0]
+            try:
+                playlist_id = cls.GET(QUERY)[0]
+            except TypeError:
+                return f"{playlist} doesn`t exists"
             GET_SONGS = f"""
                 SELECT id, filename FROM music
                 WHERE playlist_id = '{playlist_id}';
