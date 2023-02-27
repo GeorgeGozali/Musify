@@ -131,28 +131,27 @@ def add(
 
 @click.command()
 @click.option("--playlist", help="playlist name")
-@click.option("--fav", help="type SEE to see favorites")
+@click.option("--fav", is_flag=True, help="see favorites")
 def show(playlist, fav):
     """Shows library"""
     if playlist:
         Playlist.see_playlist(playlist)
     elif fav:
-        if fav.lower() == "see":
-            fav_list = Song.GET("""
-                SELECT music.filename, directory.path
-                FROM music
-                LEFT join directory ON music.directory_id=directory.id
-                WHERE music.favorites =1;
-                """, many=True)
-            if len(fav_list) > 0:
-                print("Your favorite tracks, if you want to play, go <play-fav> method\n")
-                for item in fav_list:
-                    click.echo(item[0])
-            else:
-                click.echo(
-                    "You have no favorites,\
-                        if you want to add go <add-song> \
-                            \nmethod vis argument --fav and --filename")
+        fav_list = Song.GET("""
+            SELECT music.filename, directory.path
+            FROM music
+            LEFT join directory ON music.directory_id=directory.id
+            WHERE music.favorites =1;
+            """, many=True)
+        if len(fav_list) > 0:
+            print("Your favorite tracks, if you want to play, go <play-fav> method\n")
+            for item in fav_list:
+                click.echo(item[0])
+        else:
+            click.echo(
+                "You have no favorites,\
+                    if you want to add go <add-song> \
+                        \nmethod vis argument --fav and --filename")
     else:
         Playlist.see_playlist()
 
@@ -249,7 +248,8 @@ def directory(dir, playlist, dlt):
 @click.option("--title", help="play song by name")
 @click.option("--id", help="play song by id")
 @click.option("--dir", help="play directory by name")
-def play(playlist, title, id, dir):
+@click.option("--fav", is_flag=True, help="play favorites")
+def play(playlist, title, id, dir, fav):
     """Play music"""
     if playlist:
         playlist_id = Playlist.GET(f"SELECT id FROM playlist WHERE title='{playlist}'")[0]
@@ -276,22 +276,15 @@ def play(playlist, title, id, dir):
         music_list = Song.scan(dir)
         play_list = [Song.path_plus_filename((item, dir)) for item in music_list]
         Song.play(play_list)
-
-
-@click.command()
-def play_fav():
-    """This command plays music from favorites"""
-    # music_list = Song.GET(
-    #     "SELECT filename FROM music WHERE favorites = 1;"
-    # )
-    music_list = Playlist.GET(
-        """SELECT music.filename, directory.path
-        FROM music
-        LEFT join directory ON music.directory_id=directory.id
-        WHERE music.favorites =1;
-        """, many=True)
-    play_list = [Song.path_plus_filename(item) for item in music_list]
-    Song.play(play_list)
+    elif fav:
+        music_list = Playlist.GET(
+            """SELECT music.filename, directory.path
+            FROM music
+            LEFT join directory ON music.directory_id=directory.id
+            WHERE music.favorites =1;
+            """, many=True)
+        play_list = [Song.path_plus_filename(item) for item in music_list]
+        Song.play(play_list)
 
 
 mycommands.add_command(scan)
@@ -302,7 +295,6 @@ mycommands.add_command(search_album)
 mycommands.add_command(playlist)
 mycommands.add_command(directory)
 mycommands.add_command(play)
-mycommands.add_command(play_fav)
 
 
 if __name__ == '__main__':

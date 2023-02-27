@@ -30,7 +30,8 @@ class MusicItem:
         # TODO: play single music file
         pass
 
-    def search(self):
+    @staticmethod
+    def search(search_word):
         #  TODO: find album, artist, genre, music with one code
         pass
 
