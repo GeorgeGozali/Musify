@@ -1,17 +1,21 @@
 from music_item import MusicItem, MUS_FORMATS
 import mutagen
 from mutagen.easyid3 import EasyID3
-from mutagen.id3 import ID3NoHeaderError, ID3, TPE1, TIT2, TALB
+from mutagen.id3 import ID3NoHeaderError, ID3, TPE1, TIT2, TALB, TCON
 # from playsound import playsound
 import os
 from pydub import AudioSegment
 from pydub.playback import play
 import json
+import sqlite3
+from artist import Artist
+from genre import Genre
+from album import Album
 
 
 class Song(MusicItem):
     def __init__(
-            self, filename, title=None, id=None, favorites=False, directory_id=None, 
+            self, filename, title=None, id=None, favorites=False, directory_id=None,
             artist_id=None, genre_id=None, album_id=None, playlist_id=None):
         self.id = id
         self.filename = filename
@@ -23,33 +27,65 @@ class Song(MusicItem):
         self.album_id = album_id
         self.playlist_id = playlist_id
 
-    @staticmethod
-    def add_tags(
-        filename,
-        args_dict: dict
-    ):
+    def write_track_with_tags(
+            self, dir_name: str, dir_id: int, playlist_id: int):
+        # print(dir_name)
+        # print(dir_id)
+        # print(playlist_id)
+        print()
+        filename = os.path.join(dir_name, self.filename)
+        audio_file = EasyID3(filename)
+        title = audio_file.get('title')[0]
 
-        if filename and filename.endswith(MUS_FORMATS):
-            try:
-                audio_file = EasyID3(filename)
-            except mutagen.id3.ID3NoHeaderError:
-                audio_file = mutagen.File(filename)  # , easy=True)
-                audio_file.add_tags()  # (ID3=EasyID3)
-
-            try:
-                for key, value in args_dict.items():
-                    if value is not None:
-                        audio_file[key] = value
-                audio_file.save(filename)
-            except TypeError:
-                pass
-
-    def add_song_to_db(self, audio_file):
-        ADD_TO_DB = """
-            INSERT INTO playlist ( title ,begin_date,end_date)
-              VALUES(?,?,?)
+        try:
+            artist = Song.GET(f"""
+                SELECT id FROM artist
+                WHERE full_name = '''{audio_file.get("artist")[0]}''';
+            """)
+            artist = Artist(*artist)
+        except TypeError:
+            artist = Artist(full_name=audio_file.get("artist")[0])
+            artist.CREATE(QUERY=f"""
+                INSERT INTO artist (full_name)
+                VALUES('''{artist.full_name}''')
+            """)
+        try:
+            genre = Song.GET(f"""
+                SELECT * FROM genre
+                WHERE genre = '''{audio_file.get("genre")[0]}''';
+                """)
+            genre = Genre(*genre)
+        except TypeError:
+            genre = Genre(genre=audio_file.get("genre")[0])
+            genre.CREATE(f"""
+                INSERT INTO genre (genre)
+                VALUES('''{genre.genre}''')
+            """)
+        try:
+            album = Song.GET(f"""
+                SELECT * FROM album
+                WHERE title = '''{audio_file.get("album")[0]}''';
+            """)
+            print(album)
+            album = Album(*album)
+        except TypeError:
+            album = Album(title=audio_file.get("album")[0])
+            album.CREATE(f"""
+                INSERT INTO album (title)
+                VALUES('''{album.title}''');
+            """)
+        self.CREATE(
+            f"""
+            INSERT INTO music (
+                title, filename, directory_id,
+                artist_id, album_id, genre_id, playlist_id
+                )
+            VALUES(
+                '''{title}''', '''{filename}''', {dir_id},
+                {artist.id}, {album.id},{genre.id},{playlist_id}
+                );
         """
-        # print(audio_file)
+        )
 
     @staticmethod
     def scan(directory: str):
@@ -66,6 +102,8 @@ class Song(MusicItem):
                     audio_file['title'] = u"Unknown title"
                 if not audio_file.get("album"):
                     audio_file['album'] = u"Unknown album"
+                if not audio_file.get("genre"):
+                    audio_file["genre"] = u"Unknown genre"
                 audio_file.save(filename)
             except ID3NoHeaderError:
                 if filename.endswith((".wav", ".aac")):
@@ -73,8 +111,23 @@ class Song(MusicItem):
                     audio_file.add(TPE1(encoding=3, text=u'Unknown artist'))
                     audio_file.add(TIT2(encoding=3, text=u'Unknown title'))
                     audio_file.add(TALB(encoding=3, text=u'Unknown album'))
+                    audio_file.add(TCON(encoding=3, text=u"Unknown genre"))
                     audio_file.save(os.path.join(filename))
         return music_list
+
+    def get_tags(self, dir_name: str):
+        filename = os.path.join(dir_name, self.filename)
+        audio_file = EasyID3(filename)
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        UPDATE_QUERY = f"""
+            UPDATE music SET (author = '{audio_file["author"]}', title = '{audio_file["title"]}')
+            WHERE filename = '{filename}';
+        """
+        print(UPDATE_QUERY)
+        cursor.execute(UPDATE_QUERY)
+        conn.commit()
+        conn.close()
 
     @staticmethod
     def play(music: list[str] | str) -> None:

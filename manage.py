@@ -6,7 +6,7 @@ from album import Album
 from playlist import Playlist
 import click
 import os
-import mutagen
+from mutagen.easyid3 import EasyID3
 import sqlite3
 
 
@@ -186,13 +186,13 @@ def search_album(album):
 
 @click.command()
 @click.option(
-    "--dir", required=1,
+    "--name", required=1,
     help="add dir path which contains music files")
 @click.option("--playlist", "-p", help="playlist name")
 @click.option("--delete", is_flag=True, help="delete directory with its music files")
-def directory(dir, playlist, delete):
+def directory(name, playlist, delete):
     """ Add/remove dir to/from the playlist"""
-    if not os.path.exists(dir):
+    if not os.path.exists(name):
         click.echo("Enter directory with valid path")
         return False
 
@@ -209,37 +209,36 @@ def directory(dir, playlist, delete):
                 INSERT INTO playlist (title)
                 VALUES('{playlist}')
             """)
-        if not plist.have_dir(dir):
-            new_dir = plist.add_dir(dir)
+        if not plist.have_dir(name):
+            new_dir = plist.add_dir(name)
             click.echo(f"{dir} added to {playlist}\n")
             click.echo("Scanning directory...\n")
             click.echo("Adding songs to the library...\n")
-            songs_list = Song.scan(dir)
+            songs_list = Song.scan(name)
             for song in songs_list:
                 song = Song(filename=song)
-                song.CREATE(
-                    f"""
-                    INSERT INTO music (filename, directory_id, playlist_id)
-                    VALUES('{song.filename}', {new_dir}, {plist.id})
-                """
-                )
+                song.write_track_with_tags(
+                    dir_name=name, dir_id=new_dir, playlist_id=plist.id
+                    )
+                # break
             return True
         else:
-            click.echo(f"{dir} is already added to {playlist}.")
+            click.echo(f"{name} is already added to {playlist}.")
             return False
+
     elif delete:
-        confirm = input(f"Do you realy want to delete {dir}? (yes/no) ")
+        confirm = input(f"Do you realy want to delete {name}? (yes/no) ")
         if confirm.lower() in ("yes", "y"):
             directory = Song.GET(
-                f"SELECT id FROM directory WHERE  path LIKE '%{dir}'"
+                f"SELECT id FROM directory WHERE  path LIKE '%{name}'"
             )
             if directory:
                 Song.DELETE(f"DELETE FROM directory WHERE id = '{directory[0]}'")
                 Song.DELETE(f"DELETE FROM music WHERE directory_id = '{directory[0]}'")
-                click.echo(f"{dir} has been removed from playlist!")
+                click.echo(f"{name} has been removed from playlist!")
                 return True
             else:
-                click.echo(f"{dir} dir does not exists in a playlist")
+                click.echo(f"{name} dir does not exists in a playlist")
                 return False
         return False
 

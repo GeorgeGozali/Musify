@@ -18,6 +18,15 @@ class MusicItem:
         conn.close()
 
     @staticmethod
+    def add_tags_db(QUERY):
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        print(QUERY)
+        conn.commit()
+        conn.close()
+        return cursor.lastrowid
+
+    @staticmethod
     def add_dir(dir):
         #  TODO: add music files from directory to playlist
         #  TODO: use scan method
@@ -46,6 +55,7 @@ class MusicItem:
 
     @staticmethod
     def GET(query: str, many=False):
+        print(query)
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
         if many:
@@ -61,10 +71,12 @@ class MusicItem:
     def CREATE(self, QUERY: str):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
+        print(QUERY)
         cursor.execute(QUERY)
         self.id = cursor.lastrowid
         conn.commit()
         conn.close()
+        return cursor.lastrowid
 
     @staticmethod
     def plus_one(filename: str):
