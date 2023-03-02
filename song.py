@@ -15,12 +15,12 @@ from album import Album
 
 class Song(MusicItem):
     def __init__(
-            self, filename, title=None, id=None, favorites=False, directory_id=None,
+            self, filename, title=None, id=None, favorite=False, directory_id=None,
             artist_id=None, genre_id=None, album_id=None, playlist_id=None):
         self.id = id
         self.filename = filename
         self.title = title
-        self.favorites = favorites
+        self.favorite = favorite
         self.directory_id = directory_id
         self.artist_id = artist_id
         self.genre_id = genre_id
@@ -29,10 +29,6 @@ class Song(MusicItem):
 
     def write_track_with_tags(
             self, dir_name: str, dir_id: int, playlist_id: int):
-        # print(dir_name)
-        # print(dir_id)
-        # print(playlist_id)
-        print()
         filename = os.path.join(dir_name, self.filename)
         audio_file = EasyID3(filename)
         title = audio_file.get('title')[0]
@@ -178,7 +174,7 @@ class Song(MusicItem):
     def is_favorite(filename):
         result = Song.GET(
             f"""
-                SELECT favorites FROM music
+                SELECT favorite FROM music
                 WHERE filename = '{filename.split("/")[-1]}'
             """)[0]
         return result
@@ -188,6 +184,6 @@ class Song(MusicItem):
         Song.UPDATE(
             filename=filename.split("/")[-1],
             table="music",
-            col="favorites",
+            col="favorite",
             arg=arg
         )

@@ -13,3 +13,6 @@ class Artist(MusicItem):
                 '{self.full_name}'
             )
         """
+
+    def __str__(self):
+        return self.full_name

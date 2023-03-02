@@ -8,35 +8,6 @@ class Album(MusicItem):
         self.year = year
         self.id = id
 
-    # def create(self):
-    #     conn = sqlite3.connect("database.db")
-    #     cursor = conn.cursor()
-    #     INSERT_QUERY = f"""
-    #         INSERT INTO album (title, year)
-    #         VALUES('{self.title}', '{self.year}')
-    #     """
-    #     cursor.execute(INSERT_QUERY)
-    #     self.id = cursor.lastrowid
-    #     conn.commit()
-    #     conn.close()
-
-    # @classmethod
-    # def get(cls, album):
-    #     conn = sqlite3.connect("database.db")
-    #     cursor = conn.cursor()
-    #     SEARCH_QUERY = f"SELECT * FROM album WHERE  title LIKE '{album}'"
-    #     result = cursor.execute(SEARCH_QUERY).fetchone()
-    #     conn.close()
-    #     if result:
-    #         return Album(id=result[0], title=result[1])
-    #     return None
-
-    def __repr__(self):
-        return f"Album('{self.title}', {self.year})"
-
-    def __str__(self):
-        return self.title
-
     @classmethod
     def search(cls, title: str):
         conn = sqlite3.connect("database.db")
@@ -48,3 +19,12 @@ class Album(MusicItem):
         album = cursor.fetchone()
         conn.close()
         return album
+
+    def __repr__(self):
+        return f"""Album(
+            '{self.title}',
+            {self.year}
+            )"""
+
+    def __str__(self):
+        return self.title
