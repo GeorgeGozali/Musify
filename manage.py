@@ -6,6 +6,7 @@ from album import Album
 from playlist import Playlist
 from artist import Artist
 from genre import Genre
+from song import Song
 import click
 import os
 from mutagen.easyid3 import EasyID3
@@ -304,12 +305,27 @@ def play(playlist, title, id, dir, fav):
 @click.option("--keyword", "-k", required=1, help="Find Anything by keyword")
 def search(keyword):
     """Find Anything by keyword"""
-    # album = Album.GET()
-    artit = Artist.search(keyword, table="artist", col="full_name")
-    # genre = Genre.search(keyword, table="genre", col="genre")
-    # playlist = Playlist.GET()
-    # song = Song.GET()
-    # pass
+    tracks = Song.search(keyword, table="music", col="title")
+    albums = Album.search(keyword, table="album", col="title")
+    artists = Artist.search(keyword, table="artist", col="full_name")
+    genres = Genre.search(keyword, table="genre", col="name")
+    print(f"Here is the result with this search keyword <{keyword}>:\n")
+    if tracks:
+        print("Tracks")
+        for single_track in tracks:
+            print("\t", single_track[1])
+    if albums:
+        print("\nAlbums")
+        for single_album in albums:
+            print("\t", single_album[1])
+    if artists:
+        print("\nArtists")
+        for single_artist in artists:
+            print("\t", single_artist[1])
+    if genres:
+        print("\nGenres")
+        for single_genre in genres:
+            print("\t", single_genre[1])
 
 
 mycommands.add_command(scan)

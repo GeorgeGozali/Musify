@@ -23,17 +23,15 @@ class MusicItem:
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
         GET_QUERY = f"""
-            SELECT * FROM {table};
+            SELECT * FROM {table} WHERE {col} LIKE '%{search_word}%';
         """
-        print(GET_QUERY)
+        # print(GET_QUERY)
         result = cursor.execute(GET_QUERY).fetchall()
         conn.commit()
         conn.close()
-        # print(result)
         if result:
-            for r in result:
-                print(r)
-        # self.__class__.__name__
+            return result
+        return False
 
     @staticmethod
     def DELETE(QUERY: str):
