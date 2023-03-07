@@ -4,6 +4,8 @@
 from song import Song
 from album import Album
 from playlist import Playlist
+from artist import Artist
+from genre import Genre
 import click
 import os
 from mutagen.easyid3 import EasyID3
@@ -43,12 +45,12 @@ def create_db():
         CREATE_PLAYLIST = """
             CREATE TABLE playlist (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT
+                name TEXT
             );"""
         CREATE_GENRE = """
             CREATE TABLE genre (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                genre TEXT
+                name TEXT
             );"""
         CREATE_ALBUM = """
             CREATE TABLE album (
@@ -80,7 +82,6 @@ def create_db():
         conn.close()
 
 
-# TODO: this command should not run without this > --scan', '-s'
 @click.command()
 @click.option('--dir', '-d', default='m/', required=True, help='/path/to/directory')
 def scan(dir):
@@ -197,16 +198,12 @@ def directory(name, playlist, delete):
         return False
 
     elif playlist and not delete:
-        plist = Playlist.GET(
-            f"SELECT * FROM playlist WHERE  title LIKE '{playlist}'"
-            )
-        if plist:
-            plist = Playlist(*plist[::-1])
-        else:
+        plist = Playlist.GET(table="playlist", col="name", row=playlist)
+        if not plist:
             plist = Playlist(title=playlist)
             plist.CREATE(
                 f"""
-                INSERT INTO playlist (title)
+                INSERT INTO playlist (name)
                 VALUES('{playlist}')
             """)
         if not plist.have_dir(name):
@@ -221,10 +218,10 @@ def directory(name, playlist, delete):
                     dir_name=name, dir_id=new_dir, playlist_id=plist.id
                     )
                 # break
-            return True
-        else:
-            click.echo(f"{name} is already added to {playlist}.")
-            return False
+        #     return True
+        # else:
+        #     click.echo(f"{name} is already added to {playlist}.")
+        #     return False
 
     elif delete:
         confirm = input(f"Do you realy want to delete {name}? (yes/no) ")
@@ -287,14 +284,26 @@ def play(playlist, title, id, dir, fav):
         Song.play(play_list)
 
 
+@click.command()
+@click.option("--keyword", "-k", required=1, help="Find Anything by keyword")
+def search(keyword):
+    """Find Anything by keyword"""
+    # album = Album.GET()
+    artit = Artist.search(keyword, table="artist", col="full_name")
+    # genre = Genre.search(keyword, table="genre", col="genre")
+    # playlist = Playlist.GET()
+    # song = Song.GET()
+    # pass
+
+
 mycommands.add_command(scan)
 mycommands.add_command(add)
 mycommands.add_command(playlist)
 mycommands.add_command(create_db)
+mycommands.add_command(search)
 mycommands.add_command(search_album)
 mycommands.add_command(directory)
 mycommands.add_command(play)
-
 
 if __name__ == '__main__':
     # create_db()

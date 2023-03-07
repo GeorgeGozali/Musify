@@ -13,3 +13,6 @@ class Genre(MusicItem):
                 '{self.genre}'
             )
         """
+
+    def __str__(self):
+        return self.genre

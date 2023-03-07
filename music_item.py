@@ -33,16 +33,24 @@ class MusicItem:
         #  TODO: add Dir column in playlist table
         pass
 
-    @staticmethod
-    def play(playlist=None, filename=None):
-        # TODO: play playlist
-        # TODO: play single music file
-        pass
-
-    @staticmethod
-    def search(search_word):
+    @classmethod
+    def search(cls, search_word: str, table: str, col: str):
         #  TODO: find album, artist, genre, music with one code
-        pass
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        GET_QUERY = f"""
+            SELECT * FROM {table};
+        """
+        print(GET_QUERY)
+        result = cursor.execute(GET_QUERY).fetchall()
+        print(result)
+        conn.commit()
+        conn.close()
+        # print(result)
+        if result:
+            for r in result:
+                print(r)
+        # self.__class__.__name__
 
     @staticmethod
     def DELETE(QUERY: str):
@@ -53,20 +61,34 @@ class MusicItem:
         conn.commit()
         conn.close()
 
-    @staticmethod
-    def GET(query: str, many=False):
-        print(query)
+    # @staticmethod
+    # def GET(query: str, many=False):
+    #     print(query)
+    #     conn = sqlite3.connect("database.db")
+    #     cursor = conn.cursor()
+    #     if many:
+    #         result = cursor.execute(query).fetchall()
+    #     else:
+    #         result = cursor.execute(query).fetchone()
+    #     conn.commit()
+    #     conn.close()
+    #     if result:
+    #         return result
+    #     return None
+    @classmethod
+    def GET(cls, table: str, col: str, row: str):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
-        if many:
-            result = cursor.execute(query).fetchall()
-        else:
-            result = cursor.execute(query).fetchone()
-        conn.commit()
+        GET_QUERY = f"""
+            SELECT id, {col} FROM '{table}'
+            WHERE {col} LIKE '{row}';
+        """
+        result = cursor.execute(GET_QUERY).fetchone()
+        print(GET_QUERY)
         conn.close()
         if result:
-            return result
-        return None
+            return cls(*result)
+        return False
 
     def CREATE(self, QUERY: str):
         conn = sqlite3.connect("database.db")

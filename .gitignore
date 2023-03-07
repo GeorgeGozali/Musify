@@ -1,5 +1,6 @@
 **pycache**
 m/
 .venv/
+.idea/
 test*
 *.db

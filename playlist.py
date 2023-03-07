@@ -1,8 +1,9 @@
 import sqlite3
+from music_item import MusicItem
 
 
 class Playlist(MusicItem):
-    def __init__(self, title, id=None):
+    def __init__(self, id=None, title: str | None = "Unknown Playlist"):
         self.id = id
         self.title = title
 
@@ -33,6 +34,25 @@ class Playlist(MusicItem):
     def add_song(self, filename):
         # TODO: add single song to the playlist
         pass
+
+    # @classmethod
+    # def GET(cls, name: str):
+    #     conn = sqlite3.connect("database.db")
+    #     cursor = conn.cursor()
+    #     GET_QUERY = f"""
+    #         SELECT name, id FROM playlist
+    #         WHERE name LIKE '{name}';
+    #     """
+    #     print(GET_QUERY)
+    #     try:
+    #         result = cursor.execute(GET_QUERY).fetchone()
+    #         conn.close()
+    #         return cls(*result)
+    #     except sqlite3.OperationalError:
+    #         conn.close()
+    #         return False
+    #     except TypeError:
+    #         return False
 
     @classmethod
     def see_playlist(cls, playlist=None):

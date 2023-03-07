@@ -32,43 +32,40 @@ class Song(MusicItem):
         filename = os.path.join(dir_name, self.filename)
         audio_file = EasyID3(filename)
         title = audio_file.get('title')[0]
-
-        try:
-            artist = Song.GET(f"""
-                SELECT id FROM artist
-                WHERE full_name = '''{audio_file.get("artist")[0]}''';
-            """)
-            artist = Artist(*artist)
-        except TypeError:
+        artist = Artist.GET(
+            table="artist",
+            col="full_name",
+            row=audio_file.get("artist")[0]
+        )
+        if not artist:
             artist = Artist(full_name=audio_file.get("artist")[0])
             artist.CREATE(QUERY=f"""
                 INSERT INTO artist (full_name)
-                VALUES('''{artist.full_name}''')
+                VALUES('{artist.full_name}')
             """)
-        try:
-            genre = Song.GET(f"""
-                SELECT * FROM genre
-                WHERE genre = '''{audio_file.get("genre")[0]}''';
-                """)
-            genre = Genre(*genre)
-        except TypeError:
+        print(artist)
+        genre = Genre.GET(
+            table="genre",
+            col="name",
+            row=audio_file.get("genre")[0]
+        )
+        if not genre:
             genre = Genre(genre=audio_file.get("genre")[0])
             genre.CREATE(f"""
-                INSERT INTO genre (genre)
-                VALUES('''{genre.genre}''')
+                INSERT INTO genre (name)
+                VALUES('{genre.genre}')
             """)
-        try:
-            album = Song.GET(f"""
-                SELECT * FROM album
-                WHERE title = '''{audio_file.get("album")[0]}''';
-            """)
-            print(album)
-            album = Album(*album)
-        except TypeError:
+
+        album = Album.GET(
+            table="album",
+            col="title",
+            row=audio_file.get("album")[0]
+        )
+        if not album:
             album = Album(title=audio_file.get("album")[0])
             album.CREATE(f"""
                 INSERT INTO album (title)
-                VALUES('''{album.title}''');
+                VALUES('{album.title}');
             """)
         self.CREATE(
             f"""
@@ -77,7 +74,7 @@ class Song(MusicItem):
                 artist_id, album_id, genre_id, playlist_id
                 )
             VALUES(
-                '''{title}''', '''{filename}''', {dir_id},
+                '{title}', '{filename}', {dir_id},
                 {artist.id}, {album.id},{genre.id},{playlist_id}
                 );
         """
@@ -187,3 +184,25 @@ class Song(MusicItem):
             col="favorite",
             arg=arg
         )
+
+    # @staticmethod
+    # def GET(name: str, many=False):
+    #     conn = sqlite3.connect("database.db")
+    #     cursor = conn.cursor()
+    #     GET_QUERY = f"""
+    #             SELECT id FROM music WHERE filename like '''{name}''';
+    #         """
+    #     print("\n\n\n")
+    #     print(GET_QUERY)
+    #     if many:
+    #         result = cursor.execute(GET_QUERY).fetchall()
+    #     else:
+    #         result = cursor.execute(GET_QUERY).fetchone()
+    #     conn.commit()
+    #     conn.close()
+    #     if result:
+    #         return result
+    #     return None
+
+    # def search(self):
+    #     pass

@@ -1,4 +1,5 @@
 from music_item import MusicItem
+import sqlite3
 
 
 class Artist(MusicItem):
