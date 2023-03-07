@@ -1,5 +1,6 @@
 import sqlite3
 from music_item import MusicItem
+from prettytable import PrettyTable
 
 
 class Playlist(MusicItem):
@@ -66,7 +67,10 @@ class Playlist(MusicItem):
                 many=True
                 )
             if result:
-                return result
+                myTable = PrettyTable(["id", "title", "played"])
+                for item in result:
+                    myTable.add_row([item[0], item[1], item[4]])
+                return myTable
             else:
                 return f"playlist: {playlist} doesn`t contans any songs!"
         else:
@@ -78,9 +82,12 @@ class Playlist(MusicItem):
             conn = sqlite3.connect("database.db")
             cur = conn.cursor()
             result = cur.execute(QUERY)
-            print("[ dir | num ]")
+            myTable = PrettyTable(["Directory", "Number of tracks"])
             for item in result:
-                print(item[0], "|", item[1])
+                myTable.add_row([item[0], item[1]])
+            return myTable
+
+
 
 
         # TODO: if many True see playlists names and len items

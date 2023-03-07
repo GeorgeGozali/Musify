@@ -8,6 +8,7 @@ import click
 import os
 from mutagen.easyid3 import EasyID3
 import sqlite3
+from prettytable import PrettyTable
 
 
 @click.group()
@@ -87,8 +88,10 @@ def scan(dir):
     click.echo(f"\nscaning... {dir}\n")
     music_list = Song.scan(dir)
     click.echo(f"There are {len(music_list)} music files in {dir}\n")
-    for item in music_list:
-        click.echo(item)
+    myTable = PrettyTable(['Num', 'Filename'])
+    for idx, item in enumerate(music_list, 1):
+        myTable.add_row([idx, item])
+    click.echo(myTable)
 
 
 @click.command()
@@ -154,9 +157,7 @@ def playlist(name, fav, create):
             click.echo(f"{name} already exists")
     elif name:
         playlist = Playlist.see_playlist(name)
-        click.echo("id | favorites | title")
-        for track in playlist:
-            print(track[0], track[3], track[1])
+        click.echo(playlist)
     elif fav:
         fav_list = Song.GET(
             table="music",
@@ -164,7 +165,6 @@ def playlist(name, fav, create):
             row=1,
             many=True
         )
-        print(fav_list)
         if fav_list:
             if len(fav_list) > 0:
                 click.echo("Your favorite tracks, if you want to play, go <play --fav> method\n")
@@ -176,7 +176,8 @@ def playlist(name, fav, create):
                     \nif you want to add go <add --fav> \
                         \nmethod with --filename")
     else:
-        Playlist.see_playlist()
+        result = Playlist.see_playlist()
+        click.echo(result)
 
 
 @click.command()
