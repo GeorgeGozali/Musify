@@ -31,6 +31,20 @@ class Playlist(MusicItem):
             return True
         return False
 
+    @staticmethod
+    def get_dir(dir_path):
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        GET_QUERY = f"""
+            SELECT id FROM directory WHERE path='{dir_path}';
+            """
+        print(GET_QUERY)
+        result = cursor.execute(GET_QUERY).fetchone()
+        conn.close()
+        if result:
+            return result
+        return False
+
     def add_song(self, filename):
         # TODO: add single song to the playlist
         pass

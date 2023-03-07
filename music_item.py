@@ -84,7 +84,6 @@ class MusicItem:
             WHERE {col} LIKE '{row}';
         """
         result = cursor.execute(GET_QUERY).fetchone()
-        print(GET_QUERY)
         conn.close()
         if result:
             return cls(*result)

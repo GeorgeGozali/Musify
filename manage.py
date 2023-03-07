@@ -217,21 +217,20 @@ def directory(name, playlist, delete):
                 song.write_track_with_tags(
                     dir_name=name, dir_id=new_dir, playlist_id=plist.id
                     )
-                # break
-        #     return True
-        # else:
-        #     click.echo(f"{name} is already added to {playlist}.")
-        #     return False
+            return True
+        else:
+            click.echo(f"{name} is already added to {playlist}.")
+            return False
 
     elif delete:
         confirm = input(f"Do you realy want to delete {name}? (yes/no) ")
         if confirm.lower() in ("yes", "y"):
-            directory = Song.GET(
-                f"SELECT id FROM directory WHERE  path LIKE '%{name}'"
-            )
+            directory = Playlist.get_dir(dir_path=name)
             if directory:
-                Song.DELETE(f"DELETE FROM directory WHERE id = '{directory[0]}'")
-                Song.DELETE(f"DELETE FROM music WHERE directory_id = '{directory[0]}'")
+                Song.DELETE(
+                    f"DELETE FROM directory WHERE id = '{directory[0]}'")
+                Song.DELETE(
+                    f"DELETE FROM music WHERE directory_id = '{directory[0]}'")
                 click.echo(f"{name} has been removed from playlist!")
                 return True
             else:
