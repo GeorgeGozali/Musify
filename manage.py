@@ -139,9 +139,9 @@ def playlist(name, fav, create):
     """ create or show playlist by name"""
     if name and create:
         plist = Playlist.GET(
-            f"""
-                SELECT title FROM playlist WHERE title like '{name}';
-            """
+            table="playlist",
+            col="name",
+            row=name
         )
         if not plist:
             plist = Playlist(title=name)
@@ -157,23 +157,23 @@ def playlist(name, fav, create):
     elif name:
         click.echo(Playlist.see_playlist(name))
         # print(plist)
-    elif fav:
-        fav_list = Song.GET("""
-            SELECT music.filename, directory.path
-            FROM music
-            LEFT join directory ON music.directory_id=directory.id
-            WHERE music.favorites =1;
-            """, many=True)
-        if fav_list:
-            if len(fav_list) > 0:
-                click.echo("Your favorite tracks, if you want to play, go <play --fav> method\n")
-                for item in fav_list:
-                    click.echo(item[0])
-        else:
-            click.echo(
-                "You have no favorites,\
-                    \nif you want to add go <add --fav> \
-                        \nmethod with --filename")
+    # elif fav:
+    #     fav_list = Song.GET("""
+    #         SELECT music.filename, directory.path
+    #         FROM music
+    #         LEFT join directory ON music.directory_id=directory.id
+    #         WHERE music.favorites =1;
+    #         """, many=True)
+    #     if fav_list:
+    #         if len(fav_list) > 0:
+    #             click.echo("Your favorite tracks, if you want to play, go <play --fav> method\n")
+    #             for item in fav_list:
+    #                 click.echo(item[0])
+    #     else:
+    #         click.echo(
+    #             "You have no favorites,\
+    #                 \nif you want to add go <add --fav> \
+    #                     \nmethod with --filename")
     else:
         Playlist.see_playlist()
 

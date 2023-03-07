@@ -49,52 +49,35 @@ class Playlist(MusicItem):
         # TODO: add single song to the playlist
         pass
 
-    # @classmethod
-    # def GET(cls, name: str):
-    #     conn = sqlite3.connect("database.db")
-    #     cursor = conn.cursor()
-    #     GET_QUERY = f"""
-    #         SELECT name, id FROM playlist
-    #         WHERE name LIKE '{name}';
-    #     """
-    #     print(GET_QUERY)
-    #     try:
-    #         result = cursor.execute(GET_QUERY).fetchone()
-    #         conn.close()
-    #         return cls(*result)
-    #     except sqlite3.OperationalError:
-    #         conn.close()
-    #         return False
-    #     except TypeError:
-    #         return False
-
     @classmethod
-    def see_playlist(cls, playlist=None):
-        if playlist:
-            QUERY = f"""
-                SELECT id FROM playlist WHERE title LIKE '{playlist}';
-            """
-            try:
-                playlist_id = cls.GET(QUERY)[0]
-            except TypeError:
-                return f"{playlist} doesn`t exists"
-            GET_SONGS = f"""
-                SELECT id, filename FROM music
-                WHERE playlist_id = '{playlist_id}';
-            """
-            result = cls.GET(GET_SONGS, many=True)
-            try:
-                for item in result:
-                    print(f"{item[0]}:  {item[1]}")
-            except TypeError:
+    def see_playlist(cls, playlist_name=None):
+        if playlist_name:
+            playlist = cls.GET(
+                table="playlist",
+                col="name",
+                row=playlist_name
+                )
+            if not playlist:
+                return f"{playlist_name} doesn`t exists"
+            result = cls.GET(
+                table="music",
+                col="playlist_id",
+                row=playlist.id,
+                many=True
+                )
+            if result:
+                return result
+            else:
                 return f"playlist: {playlist} doesn`t contans any songs!"
         else:
             QUERY = """
-                SELECT playlist.title, COUNT(music.playlist_id) as C
+                SELECT playlist.name, COUNT(music.playlist_id) as C
                 FROM playlist
                 LEFT JOIN music ON playlist.id=music.playlist_id;
             """
-            result = cls.GET(QUERY, many=True)
+            conn = sqlite3.connect("database.db")
+            cur = conn.cursor()
+            result = cur.execute(QUERY)
             print("[ dir | num ]")
             for item in result:
                 print(item[0], "|", item[1])

@@ -17,22 +17,6 @@ class MusicItem:
         conn.commit()
         conn.close()
 
-    @staticmethod
-    def add_tags_db(QUERY):
-        conn = sqlite3.connect("database.db")
-        cursor = conn.cursor()
-        print(QUERY)
-        conn.commit()
-        conn.close()
-        return cursor.lastrowid
-
-    @staticmethod
-    def add_dir(dir):
-        #  TODO: add music files from directory to playlist
-        #  TODO: use scan method
-        #  TODO: add Dir column in playlist table
-        pass
-
     @classmethod
     def search(cls, search_word: str, table: str, col: str):
         #  TODO: find album, artist, genre, music with one code
@@ -43,7 +27,6 @@ class MusicItem:
         """
         print(GET_QUERY)
         result = cursor.execute(GET_QUERY).fetchall()
-        print(result)
         conn.commit()
         conn.close()
         # print(result)
@@ -56,43 +39,32 @@ class MusicItem:
     def DELETE(QUERY: str):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
-        print(QUERY)
         cursor.execute(QUERY)
         conn.commit()
         conn.close()
 
-    # @staticmethod
-    # def GET(query: str, many=False):
-    #     print(query)
-    #     conn = sqlite3.connect("database.db")
-    #     cursor = conn.cursor()
-    #     if many:
-    #         result = cursor.execute(query).fetchall()
-    #     else:
-    #         result = cursor.execute(query).fetchone()
-    #     conn.commit()
-    #     conn.close()
-    #     if result:
-    #         return result
-    #     return None
     @classmethod
-    def GET(cls, table: str, col: str, row: str):
+    def GET(cls, table: str, col: str, row: str, many=False):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
         GET_QUERY = f"""
-            SELECT id, {col} FROM '{table}'
+            SELECT * FROM '{table}'
             WHERE {col} LIKE '{row}';
         """
-        result = cursor.execute(GET_QUERY).fetchone()
-        conn.close()
-        if result:
-            return cls(*result)
-        return False
+        if many:
+            result = cursor.execute(GET_QUERY).fetchall()
+            return result
+        else:
+            result = cursor.execute(GET_QUERY).fetchone()
+            conn.close()
+            if result:
+                return cls(*result)
+            return False
 
     def CREATE(self, QUERY: str):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
-        print(QUERY)
+        # print(QUERY)
         cursor.execute(QUERY)
         self.id = cursor.lastrowid
         conn.commit()
