@@ -1,6 +1,8 @@
 import sqlite3
-from music_item import MusicItem
+
 from prettytable import PrettyTable
+
+from music_item import MusicItem
 
 
 class Playlist(MusicItem):
@@ -46,26 +48,15 @@ class Playlist(MusicItem):
             return result
         return False
 
-    def add_song(self, filename):
-        # TODO: add single song to the playlist
-        pass
-
     @classmethod
     def see_playlist(cls, playlist_name=None):
         if playlist_name:
-            playlist = cls.GET(
-                table="playlist",
-                col="name",
-                row=playlist_name
-                )
+            playlist = cls.GET(table="playlist", col="name", row=playlist_name)
             if not playlist:
                 return f"{playlist_name} doesn`t exists"
             result = cls.GET(
-                table="music",
-                col="playlist_id",
-                row=playlist.id,
-                many=True
-                )
+                table="music", col="playlist_id", row=playlist.id, many=True
+            )
             if result:
                 myTable = PrettyTable(["id", "title", "played"])
                 for item in result:
@@ -86,13 +77,6 @@ class Playlist(MusicItem):
             for item in result:
                 myTable.add_row([item[0], item[1]])
             return myTable
-
-
-
-
-        # TODO: if many True see playlists names and len items
-        # TODO: else see len items and items
-        pass
 
     def __repr__(self):
         return f"""

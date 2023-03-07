@@ -1,12 +1,12 @@
 import sqlite3
-MUS_FORMATS = ('.mp3', '.wav', '.acc', '.flac')
+
+MUS_FORMATS = (".mp3", ".wav", ".acc", ".flac")
 
 
 class MusicItem:
-
     # @staticmethod
     @classmethod
-    def add_album_to_db(cls, album, year='Null'):
+    def add_album_to_db(cls, album, year="Null"):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
         INSERT_QUERY = f"""
@@ -19,13 +19,11 @@ class MusicItem:
 
     @classmethod
     def search(cls, search_word: str, table: str, col: str):
-        #  TODO: find album, artist, genre, music with one code
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
         GET_QUERY = f"""
             SELECT * FROM {table} WHERE {col} LIKE '%{search_word}%';
         """
-        # print(GET_QUERY)
         result = cursor.execute(GET_QUERY).fetchall()
         conn.commit()
         conn.close()

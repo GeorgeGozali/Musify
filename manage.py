@@ -1,14 +1,13 @@
-from song import Song
+import click
+import os
+from prettytable import PrettyTable
+import sqlite3
+
 from album import Album
-from playlist import Playlist
 from artist import Artist
 from genre import Genre
 from song import Song
-import click
-import os
-from mutagen.easyid3 import EasyID3
-import sqlite3
-from prettytable import PrettyTable
+from playlist import Playlist
 
 
 @click.group()
@@ -16,9 +15,10 @@ def mycommands():
     pass
 
 
+# This Command creates database and its tables
 @click.command()
-def create_db():
-    """ This command creates database with its tables """
+def init_db():
+    """This command creates database with its tables"""
     if not os.path.exists("database.db"):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
@@ -81,31 +81,51 @@ def create_db():
         conn.close()
 
 
+# This Command lists music files in directory, add ID3 tags
+# python3 manage.py scan --dir /home/george/Music/
 @click.command()
-@click.option('--dir', '-d', default='m/', required=True, help='/path/to/directory')
+@click.option("--dir", "-d", default="m/", required=True, help="/path/to/directory")
 def scan(dir):
     """Scan directory"""
+    if not os.path.exists(dir):
+        click.echo("Enter directory with valid path")
+        return False
     click.echo(f"\nscaning... {dir}\n")
     music_list = Song.scan(dir)
     click.echo(f"There are {len(music_list)} music files in {dir}\n")
-    myTable = PrettyTable(['Num', 'Filename'])
+    myTable = PrettyTable(["Num", "Filename"])
     for idx, item in enumerate(music_list, 1):
         myTable.add_row([idx, item])
     click.echo(myTable)
+
+
+# This Command add tags with json
+# User can add each tag
+# User can add track in favorites and remove, by dir/filename
+"""
+    python3 manage.py add-song --filename /home/george/Music/Led-Zeppelin-
+    Stairway-To-Heaven.mp3 -t Stairway To Heaven -g Rock
+"""
+"""
+    python3 manage.py add-song --filename /home/george/Music/Led-Zeppelin-
+    Stairway-To-Heaven.mp3 --tags /home/george/Music/data/test/json
+"""
+"""
+    python3 manage.py add --filename /home/george/Music/Led-Zeppelin-Stairway
+    -To-Heaven.mp3  --fav
+"""
 
 
 @click.command()
 @click.option("--filename", required=1, type=str, help="/path/to/filename")
 @click.option("--tags", type=str, help="/path/to/json_data")
 @click.option("--title", "-t", type=str, help="Title of the song")
-@click.option("--genre", "-g",  type=str, help="Genre of the song")
-@click.option("--album", '-a', type=str, help="Album of the song")
-@click.option("--artist",  type=str, help="Name of the singer")
+@click.option("--genre", "-g", type=str, help="Genre of the song")
+@click.option("--album", "-a", type=str, help="Album of the song")
+@click.option("--artist", type=str, help="Name of the singer")
 @click.option("--fav", is_flag=True, help="add to favorites")
-@click.option("--rmfav", '-rf', is_flag=True, help="remove from favorites")
-def add(
-    filename, fav, rmfav, **kwargs
-):
+@click.option("--rmfav", "-rf", is_flag=True, help="remove from favorites")
+def add(filename, fav, rmfav, **kwargs):
     """This Method is to add a song in a library."""
 
     # Add Tags, if user inputs any of them
@@ -113,10 +133,10 @@ def add(
         Song.add_tags(filename, kwargs)
 
     # Add Tags, if user adds json file of tags
-    if kwargs['tags']:
-        # TODO: add tags to the song and in the db
+    if kwargs["tags"]:
         Song.add_tags_from_json(
-            json_file="/home/george/Music/tags/test.json", filename=filename)
+            json_file="/home/george/Music/tags/test.json", filename=filename
+        )
     if fav:
         if Song.is_favorite(filename):
             click.echo("\nThis song is already in favorites")
@@ -132,18 +152,16 @@ def add(
             click.echo("\nThat song removed from favorites")
 
 
+# With this command is possible to see or create new playlist
+# See favorites
 @click.command()
 @click.option("--name", "-n", required=0, help="playlist name")
 @click.option("--fav", is_flag=True, help="see favorites")
-@click.option("--create", '-c', is_flag=True, help="create new playlist")
+@click.option("--create", "-c", is_flag=True, help="create new playlist")
 def playlist(name, fav, create):
-    """ create or show playlist by name"""
+    """create or show playlist by name"""
     if name and create:
-        plist = Playlist.GET(
-            table="playlist",
-            col="name",
-            row=name
-        )
+        plist = Playlist.GET(table="playlist", col="name", row=name)
         if not plist:
             plist = Playlist(title=name)
             plist.CREATE(
@@ -159,42 +177,34 @@ def playlist(name, fav, create):
         playlist = Playlist.see_playlist(name)
         click.echo(playlist)
     elif fav:
-        fav_list = Song.GET(
-            table="music",
-            col="favorites",
-            row=1,
-            many=True
-        )
+        fav_list = Song.GET(table="music", col="favorites", row=1, many=True)
         if fav_list:
             if len(fav_list) > 0:
-                click.echo("Your favorite tracks, if you want to play, go <play --fav> method\n")
+                click.echo(
+                    "Your favorite tracks, if you want to play, go <play --fav> method\n"
+                )
                 for item in fav_list:
                     click.echo(item[0])
         else:
             click.echo(
                 "You have no favorites,\
                     \nif you want to add go <add --fav> \
-                        \nmethod with --filename")
+                        \nmethod with --filename"
+            )
     else:
         result = Playlist.see_playlist()
         click.echo(result)
 
 
+# With this command is possible to add or delete directory from playlist
+# tracks located in directory will add or remove from playlist
+# python3 manage.py directory --name "/home/george/Music" --playlist name
 @click.command()
-@click.option("--album", required=1, type=str, help="Album Title")
-def search_album(album):
-    """ This command finds album by title"""
-    click.echo(Album.search(album))
-
-
-@click.command()
-@click.option(
-    "--name", required=1,
-    help="add dir path which contains music files")
+@click.option("--name", required=1, help="add dir path which contains music files")
 @click.option("--playlist", "-p", help="playlist name")
 @click.option("--delete", is_flag=True, help="delete directory with its music files")
 def directory(name, playlist, delete):
-    """ Add/remove dir to/from the playlist"""
+    """Add/remove dir to/from the playlist"""
     if not os.path.exists(name):
         click.echo("Enter directory with valid path")
         return False
@@ -207,7 +217,8 @@ def directory(name, playlist, delete):
                 f"""
                 INSERT INTO playlist (name)
                 VALUES('{playlist}')
-            """)
+            """
+            )
         if not plist.have_dir(name):
             new_dir = plist.add_dir(name)
             click.echo(f"{dir} added to {playlist}\n")
@@ -218,7 +229,7 @@ def directory(name, playlist, delete):
                 song = Song(filename=song)
                 song.write_track_with_tags(
                     dir_name=name, dir_id=new_dir, playlist_id=plist.id
-                    )
+                )
             return True
         else:
             click.echo(f"{name} is already added to {playlist}.")
@@ -229,10 +240,8 @@ def directory(name, playlist, delete):
         if confirm.lower() in ("yes", "y"):
             directory = Playlist.get_dir(dir_path=name)
             if directory:
-                Song.DELETE(
-                    f"DELETE FROM directory WHERE id = '{directory[0]}'")
-                Song.DELETE(
-                    f"DELETE FROM music WHERE directory_id = '{directory[0]}'")
+                Song.DELETE(f"DELETE FROM directory WHERE id = '{directory[0]}'")
+                Song.DELETE(f"DELETE FROM music WHERE directory_id = '{directory[0]}'")
                 click.echo(f"{name} has been removed from playlist!")
                 return True
             else:
@@ -241,8 +250,12 @@ def directory(name, playlist, delete):
         return False
 
 
+# with this command is possible to play playlist
+# or play directory, or play favorites, or play by id
+# python3 manage.py play --playlist test
+# python3 manage.py play --id 3
 @click.command()
-@click.option("--playlist", '-p', help="Choose playlist you want to play")
+@click.option("--playlist", "-p", help="Choose playlist you want to play")
 @click.option("--title", help="play song by name")
 @click.option("--id", help="play song by id")
 @click.option("--dir", help="play directory by name")
@@ -250,11 +263,7 @@ def directory(name, playlist, delete):
 def play(playlist, title, id, dir, fav):
     """Play music"""
     if playlist:
-        playlist = Playlist.GET(
-            table="playlist",
-            col="name",
-            row=playlist
-        )
+        playlist = Playlist.GET(table="playlist", col="name", row=playlist)
         conn = sqlite3.connect("database.db")
         cur = conn.cursor()
         music_list = cur.execute(
@@ -262,7 +271,8 @@ def play(playlist, title, id, dir, fav):
             FROM music
             LEFT join directory ON music.directory_id=directory.id
             WHERE music.playlist_id ='{playlist.id}';
-            """).fetchall()
+            """
+        ).fetchall()
         play_list = [Song.path_plus_filename(item) for item in music_list]
         Song.play(play_list)
     elif title:
@@ -275,7 +285,8 @@ def play(playlist, title, id, dir, fav):
             FROM music
             LEFT join directory ON music.directory_id=directory.id
             WHERE music.id ='{id}';
-            """).fetchone()
+            """
+        ).fetchone()
         song_filename = Song.path_plus_filename(music_file)
         Song.play(song_filename)
     elif dir:
@@ -290,7 +301,8 @@ def play(playlist, title, id, dir, fav):
             FROM music
             LEFT join directory ON music.directory_id=directory.id
             WHERE music.favorites =1;
-            """).fetchall()
+            """
+        ).fetchall()
         if music_list:
             play_list = [Song.path_plus_filename(item) for item in music_list]
             Song.play(play_list)
@@ -299,6 +311,8 @@ def play(playlist, title, id, dir, fav):
     conn.close()
 
 
+# With this command is possible to find anything by keyword
+# python3 manage.py search -k "Led Zep"
 @click.command()
 @click.option("--keyword", "-k", required=1, help="Find Anything by keyword")
 def search(keyword):
@@ -329,12 +343,10 @@ def search(keyword):
 mycommands.add_command(scan)
 mycommands.add_command(add)
 mycommands.add_command(playlist)
-mycommands.add_command(create_db)
+mycommands.add_command(init_db)
 mycommands.add_command(search)
-mycommands.add_command(search_album)
 mycommands.add_command(directory)
 mycommands.add_command(play)
 
-if __name__ == '__main__':
-    # create_db()
+if __name__ == "__main__":
     mycommands()

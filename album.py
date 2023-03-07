@@ -1,4 +1,3 @@
-import sqlite3
 from music_item import MusicItem
 
 
