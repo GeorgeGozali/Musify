@@ -127,18 +127,19 @@ class Song(MusicItem):
         if isinstance(music, str):
             music = [music]
         for item in music:
+            # print(item)
             if item.endswith(MUS_FORMATS):
                 name = item.split('/')[-1]
                 format = name.split(".")[-1]
             try:
-                Song.plus_one(name)
+                Song.plus_one(item)
                 song = AudioSegment.from_file(item, format)
-
                 print(f"\nplaying: {name}\n")
                 play(song)
-
+           
             except Exception:
-                print(f"\ncan`t play {name}\n")
+                print(f"\ncan`t play <{name}>\n")
+            break
 
     @staticmethod
     def path_plus_filename(item: tuple[str]):

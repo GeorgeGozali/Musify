@@ -75,7 +75,7 @@ class MusicItem:
     def plus_one(filename: str):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
-        GET_QUERY = f"SELECT played FROM music WHERE filename ='{filename}'"
+        GET_QUERY = f"SELECT played FROM music WHERE filename LIKE '{filename}';"
         played_num = int(cursor.execute(GET_QUERY).fetchone()[0])
         POST_QUERY = f"""
             UPDATE music SET played = {played_num + 1}

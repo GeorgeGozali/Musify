@@ -155,25 +155,28 @@ def playlist(name, fav, create):
         else:
             click.echo(f"{name} already exists")
     elif name:
-        click.echo(Playlist.see_playlist(name))
-        # print(plist)
-    # elif fav:
-    #     fav_list = Song.GET("""
-    #         SELECT music.filename, directory.path
-    #         FROM music
-    #         LEFT join directory ON music.directory_id=directory.id
-    #         WHERE music.favorites =1;
-    #         """, many=True)
-    #     if fav_list:
-    #         if len(fav_list) > 0:
-    #             click.echo("Your favorite tracks, if you want to play, go <play --fav> method\n")
-    #             for item in fav_list:
-    #                 click.echo(item[0])
-    #     else:
-    #         click.echo(
-    #             "You have no favorites,\
-    #                 \nif you want to add go <add --fav> \
-    #                     \nmethod with --filename")
+        playlist = Playlist.see_playlist(name)
+        click.echo("id | favorites | title")
+        for track in playlist:
+            print(track[0], track[3], track[1])
+    elif fav:
+        fav_list = Song.GET(
+            table="music",
+            col="favorites",
+            row=1,
+            many=True
+        )
+        print(fav_list)
+        if fav_list:
+            if len(fav_list) > 0:
+                click.echo("Your favorite tracks, if you want to play, go <play --fav> method\n")
+                for item in fav_list:
+                    click.echo(item[0])
+        else:
+            click.echo(
+                "You have no favorites,\
+                    \nif you want to add go <add --fav> \
+                        \nmethod with --filename")
     else:
         Playlist.see_playlist()
 
@@ -248,24 +251,32 @@ def directory(name, playlist, delete):
 def play(playlist, title, id, dir, fav):
     """Play music"""
     if playlist:
-        playlist_id = Playlist.GET(f"SELECT id FROM playlist WHERE title='{playlist}'")[0]
-        music_list = Playlist.GET(
+        playlist = Playlist.GET(
+            table="playlist",
+            col="name",
+            row=playlist
+        )
+        conn = sqlite3.connect("database.db")
+        cur = conn.cursor()
+        music_list = cur.execute(
             f"""SELECT music.filename, directory.path
             FROM music
             LEFT join directory ON music.directory_id=directory.id
-            WHERE music.playlist_id ='{playlist_id}';
-            """, many=True)
+            WHERE music.playlist_id ='{playlist.id}';
+            """).fetchall()
         play_list = [Song.path_plus_filename(item) for item in music_list]
         Song.play(play_list)
     elif title:
         pass
     elif id:
-        music_file = Playlist.GET(
+        conn = sqlite3.connect("database.db")
+        cur = conn.cursor()
+        music_file = cur.execute(
             f"""SELECT music.filename, directory.path
             FROM music
             LEFT join directory ON music.directory_id=directory.id
             WHERE music.id ='{id}';
-            """)
+            """).fetchone()
         song_filename = Song.path_plus_filename(music_file)
         Song.play(song_filename)
     elif dir:
@@ -273,14 +284,20 @@ def play(playlist, title, id, dir, fav):
         play_list = [Song.path_plus_filename((item, dir)) for item in music_list]
         Song.play(play_list)
     elif fav:
-        music_list = Playlist.GET(
+        conn = sqlite3.connect("database.db")
+        cur = conn.cursor()
+        music_list = cur.execute(
             """SELECT music.filename, directory.path
             FROM music
             LEFT join directory ON music.directory_id=directory.id
             WHERE music.favorites =1;
-            """, many=True)
-        play_list = [Song.path_plus_filename(item) for item in music_list]
-        Song.play(play_list)
+            """).fetchall()
+        if music_list:
+            play_list = [Song.path_plus_filename(item) for item in music_list]
+            Song.play(play_list)
+        else:
+            click.echo("You do not have favorites")
+    conn.close()
 
 
 @click.command()
