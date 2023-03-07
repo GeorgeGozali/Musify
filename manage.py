@@ -1,6 +1,3 @@
-# from music_item import MusicItem
-# from album import Album
-# from artist import Artist
 from song import Song
 from album import Album
 from playlist import Playlist

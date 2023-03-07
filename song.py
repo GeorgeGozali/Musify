@@ -185,25 +185,3 @@ class Song(MusicItem):
             col="favorite",
             arg=arg
         )
-
-    # @staticmethod
-    # def GET(name: str, many=False):
-    #     conn = sqlite3.connect("database.db")
-    #     cursor = conn.cursor()
-    #     GET_QUERY = f"""
-    #             SELECT id FROM music WHERE filename like '''{name}''';
-    #         """
-    #     print("\n\n\n")
-    #     print(GET_QUERY)
-    #     if many:
-    #         result = cursor.execute(GET_QUERY).fetchall()
-    #     else:
-    #         result = cursor.execute(GET_QUERY).fetchone()
-    #     conn.commit()
-    #     conn.close()
-    #     if result:
-    #         return result
-    #     return None
-
-    # def search(self):
-    #     pass
